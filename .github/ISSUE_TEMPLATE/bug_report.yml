@@ -1,0 +1,33 @@
+name: Bug report
+description: A script failed, produced wrong numbers, or the skill misbehaved.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you run or ask, and what did you get?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: input
+    id: language
+    attributes:
+      label: Language / framework of the analysed codebase
+      placeholder: e.g. TypeScript + NestJS, Java + Spring
+  - type: input
+    id: phase
+    attributes:
+      label: Phase or script
+      placeholder: e.g. Phase 4, extract_dependencies.py
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output or logs
+      description: Remove anything proprietary first.
+      render: shell

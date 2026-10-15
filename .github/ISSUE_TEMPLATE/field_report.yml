@@ -1,0 +1,24 @@
+name: Field report
+description: You ran the skill on a real monolith. Tell us how it went.
+labels: [field-report]
+body:
+  - type: input
+    id: context
+    attributes:
+      label: Codebase (no proprietary details needed)
+      placeholder: e.g. 400k-line Java/Spring monolith, 12 teams
+  - type: input
+    id: phases
+    attributes:
+      label: Phases you went through
+      placeholder: e.g. 0 to 4
+  - type: textarea
+    id: worked
+    attributes:
+      label: What worked well?
+  - type: textarea
+    id: confusing
+    attributes:
+      label: What was confusing, wrong or missing?
+    validations:
+      required: true
