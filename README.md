@@ -17,6 +17,21 @@
   <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-34d399.svg"></a>
 </p>
 
+<p align="center">
+  <a href="plugins/monolith-decomposition/skills/decompose/adapters/jvm.md"><img alt="Java" src="https://img.shields.io/badge/Java-ED8B00?logo=openjdk&logoColor=white"></a>
+  <a href="plugins/monolith-decomposition/skills/decompose/adapters/jvm.md"><img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-7F52FF?logo=kotlin&logoColor=white"></a>
+  <a href="plugins/monolith-decomposition/skills/decompose/adapters/dotnet.md"><img alt="C# / .NET" src="https://img.shields.io/badge/C%23%20%2F%20.NET-512BD4?logo=dotnet&logoColor=white"></a>
+  <a href="plugins/monolith-decomposition/skills/decompose/adapters/typescript.md"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white"></a>
+  <a href="plugins/monolith-decomposition/skills/decompose/adapters/typescript.md"><img alt="JavaScript" src="https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black"></a>
+  <a href="plugins/monolith-decomposition/skills/decompose/adapters/python.md"><img alt="Python" src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white"></a>
+  <a href="plugins/monolith-decomposition/skills/decompose/adapters/go.md"><img alt="Go" src="https://img.shields.io/badge/Go-00ADD8?logo=go&logoColor=white"></a>
+  <a href="plugins/monolith-decomposition/skills/decompose/adapters/php.md"><img alt="PHP" src="https://img.shields.io/badge/PHP-777BB4?logo=php&logoColor=white"></a>
+  <a href="plugins/monolith-decomposition/skills/decompose/adapters/ruby.md"><img alt="Ruby" src="https://img.shields.io/badge/Ruby-CC342D?logo=ruby&logoColor=white"></a>
+  <a href="plugins/monolith-decomposition/skills/decompose/adapters/other.md"><img alt="Rust" src="https://img.shields.io/badge/Rust-000000?logo=rust&logoColor=white"></a>
+  <a href="plugins/monolith-decomposition/skills/decompose/adapters/other.md"><img alt="Elixir" src="https://img.shields.io/badge/Elixir-4B275F?logo=elixir&logoColor=white"></a>
+  <a href="plugins/monolith-decomposition/skills/decompose/adapters/other.md"><img alt="C++" src="https://img.shields.io/badge/C%2B%2B-00599C?logo=cplusplus&logoColor=white"></a>
+</p>
+
 ---
 
 Most monolith-to-microservices migrations go wrong in the same place: the
