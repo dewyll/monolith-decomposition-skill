@@ -1,0 +1,26 @@
+name: Adapter request or improvement
+description: Better support for a language, framework or tool.
+labels: [adapter]
+body:
+  - type: input
+    id: ecosystem
+    attributes:
+      label: Language / framework
+    validations:
+      required: true
+  - type: textarea
+    id: component
+    attributes:
+      label: What counts as a "component" there?
+      description: Package, namespace, module, folder, pack, crate...
+  - type: textarea
+    id: tools
+    attributes:
+      label: Tools you would use
+      description: Dependency extractors and architecture-test / fitness-function libraries, with links.
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd like to open a pull request for this
