@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dewyll/monolith-decomposition-skill/schemas/config.schema.json",
+  "title": "Decomposition configuration",
+  "description": "decomposition/config.json; see references/workspace.md.",
+  "type": "object",
+  "required": [
+    "source_roots",
+    "components"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "project_root": {
+      "type": "string"
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source_roots": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "required": [
+              "path"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "namespace_prefix": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "include": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "exclude": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "extensions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "import_aliases": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "components": {
+      "type": "object",
+      "properties": {
+        "strategy": {
+          "enum": [
+            "directory",
+            "explicit"
+          ]
+        },
+        "max_depth": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "separator": {
+          "type": "string"
+        },
+        "explicit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "paths"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "paths": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "size": {
+          "enum": [
+            "auto",
+            "scc",
+            "builtin"
+          ]
+        }
+      }
+    },
+    "thresholds": {
+      "type": "object",
+      "properties": {
+        "size_outlier_stddev": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "max_component_percent": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "max_efferent_coupling": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "min_domain_cohesion": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "common_fan_in_ratio": {
+          "type": "number"
+        }
+      }
+    },
+    "common_keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "fitness": {
+      "type": "object",
+      "properties": {
+        "size_allowlist": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "orphan_allowlist": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "allowed_cycles": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "forbidden_dependencies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "from",
+              "to"
+            ],
+            "properties": {
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              },
+              "level": {
+                "enum": [
+                  "domain",
+                  "component"
+                ]
+              },
+              "rfc": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "workspace": {
+      "type": "object",
+      "properties": {
+        "rfc_dir": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

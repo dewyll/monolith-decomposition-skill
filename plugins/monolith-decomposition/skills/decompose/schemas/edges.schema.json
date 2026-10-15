@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dewyll/monolith-decomposition-skill/schemas/edges.schema.json",
+  "title": "Component dependency edges",
+  "description": "Neutral edge list consumed by analyze_dependencies.py. Produced by extract_dependencies.py, convert_edges.py, or by hand for runtime/database coupling.",
+  "type": "object",
+  "required": [
+    "edges"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "generator": {
+      "type": "object",
+      "required": [
+        "tool"
+      ],
+      "properties": {
+        "tool": {
+          "type": "string"
+        },
+        "metric": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low",
+            "unknown"
+          ]
+        },
+        "blind_spots": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "internal_references": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer"
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "from",
+          "to"
+        ],
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1,
+            "description": "Number of files/items in 'from' that reference 'to'"
+          },
+          "kinds": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "static",
+                "dynamic",
+                "runtime",
+                "database",
+                "event"
+              ]
+            }
+          },
+          "samples": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

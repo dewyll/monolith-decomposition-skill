@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dewyll/monolith-decomposition-skill/schemas/domains.schema.json",
+  "title": "Component domains",
+  "description": "Phase 5 domain map. Every component belongs to exactly one domain.",
+  "type": "object",
+  "required": [
+    "domains"
+  ],
+  "properties": {
+    "domains": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "components"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]+$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "owner": {
+            "type": "string"
+          },
+          "rfc": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

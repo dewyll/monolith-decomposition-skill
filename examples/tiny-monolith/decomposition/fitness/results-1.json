@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-10-15T11:00:55+00:00",
+  "phase": "1",
+  "strict": false,
+  "passed": false,
+  "results": [
+    {
+      "id": "F1.1",
+      "status": "PASS",
+      "message": "all source files mapped to a component",
+      "details": []
+    },
+    {
+      "id": "F1.2",
+      "status": "FAIL",
+      "message": "1 component(s) above the max share",
+      "details": [
+        "shopco.orders: 29.89%"
+      ]
+    },
+    {
+      "id": "F1.3",
+      "status": "WARN",
+      "message": "1 size outlier(s) without justification",
+      "details": [
+        "shopco.orders: z=2.74"
+      ]
+    }
+  ]
+}

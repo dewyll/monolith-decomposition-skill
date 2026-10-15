@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-15T11:00:13+00:00",
+  "generator": {
+    "tool": "size_components.py",
+    "metric": "logical-lines",
+    "confidence": "high"
+  },
+  "parameters": {
+    "size_outlier_stddev": 1.0,
+    "max_component_percent": 15.0
+  },
+  "totals": {
+    "components": 10,
+    "files": 20,
+    "size": 87
+  },
+  "stats": {
+    "mean": 8.7,
+    "stddev": 6.33
+  },
+  "components": [
+    {
+      "id": "shopco.orders",
+      "path": "shopco/orders",
+      "language": "python",
+      "files": 2,
+      "size": 26,
+      "percent": 29.89,
+      "z_score": 2.74,
+      "complexity": null,
+      "children": [
+        "shopco.orders.notification",
+        "shopco.orders.pricing"
+      ],
+      "orphan_files": 2,
+      "flags": [
+        "large",
+        "over-max",
+        "root-with-code"
+      ],
+      "orphan_file_paths": [
+        "shopco/orders/__init__.py",
+        "shopco/orders/service.py"
+      ]
+    },
+    {
+      "id": "shopco.inventory",
+      "path": "shopco/inventory",
+      "language": "python",
+      "files": 2,
+      "size": 11,
+      "percent": 12.64,
+      "z_score": 0.36,
+      "complexity": null,
+      "children": [],
+      "orphan_files": 0,
+      "flags": []
+    },
+    {
+      "id": "shopco.reporting",
+      "path": "shopco/reporting",
+      "language": "python",
+      "files": 2,
+      "size": 10,
+      "percent": 11.49,
+      "z_score": 0.21,
+      "complexity": null,
+      "children": [],
+      "orphan_files": 0,
+      "flags": []
+    },
+    {
+      "id": "shopco",
+      "path": "shopco",
+      "language": "python",
+      "files": 2,
+      "size": 9,
+      "percent": 10.34,
+      "z_score": 0.05,
+      "complexity": null,
+      "children": [
+        "shopco.audit",
+        "shopco.customers",
+        "shopco.inventory",
+        "shopco.notification",
+        "shopco.orders",
+        "shopco.orders.notification",
+        "shopco.orders.pricing",
+        "shopco.payments",
+        "shopco.reporting"
+      ],
+      "orphan_files": 2,
+      "flags": [
+        "root-with-code"
+      ],
+      "orphan_file_paths": [
+        "shopco/__init__.py",
+        "shopco/app.py"
+      ]
+    },
+    {
+      "id": "shopco.payments",
+      "path": "shopco/payments",
+      "language": "python",
+      "files": 2,
+      "size": 9,
+      "percent": 10.34,
+      "z_score": 0.05,
+      "complexity": null,
+      "children": [],
+      "orphan_files": 0,
+      "flags": []
+    },
+    {
+      "id": "shopco.audit",
+      "path": "shopco/audit",
+      "language": "python",
+      "files": 2,
+      "size": 5,
+      "percent": 5.75,
+      "z_score": -0.58,
+      "complexity": null,
+      "children": [],
+      "orphan_files": 0,
+      "flags": []
+    },
+    {
+      "id": "shopco.orders.pricing",
+      "path": "shopco/orders/pricing",
+      "language": "python",
+      "files": 2,
+      "size": 5,
+      "percent": 5.75,
+      "z_score": -0.58,
+      "complexity": null,
+      "children": [],
+      "orphan_files": 0,
+      "flags": []
+    },
+    {
+      "id": "shopco.customers",
+      "path": "shopco/customers",
+      "language": "python",
+      "files": 2,
+      "size": 4,
+      "percent": 4.6,
+      "z_score": -0.74,
+      "complexity": null,
+      "children": [],
+      "orphan_files": 0,
+      "flags": []
+    },
+    {
+      "id": "shopco.notification",
+      "path": "shopco/notification",
+      "language": "python",
+      "files": 2,
+      "size": 4,
+      "percent": 4.6,
+      "z_score": -0.74,
+      "complexity": null,
+      "children": [],
+      "orphan_files": 0,
+      "flags": []
+    },
+    {
+      "id": "shopco.orders.notification",
+      "path": "shopco/orders/notification",
+      "language": "python",
+      "files": 2,
+      "size": 4,
+      "percent": 4.6,
+      "z_score": -0.74,
+      "complexity": null,
+      "children": [],
+      "orphan_files": 0,
+      "flags": []
+    }
+  ],
+  "unassigned_files": [],
+  "unassigned_count": 0
+}

@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-15T11:00:23+00:00",
+  "generator": {
+    "tool": "extract_dependencies.py",
+    "method": "regex-static-imports",
+    "confidence": "low",
+    "blind_spots": [
+      "dependency injection",
+      "reflection",
+      "events/messages",
+      "framework autoloading",
+      "string-based lookups",
+      "shared database tables"
+    ]
+  },
+  "components_source": "01-sizing/components.json",
+  "stats": {
+    "files": 20,
+    "imports": 34,
+    "resolved": 31,
+    "external_or_unresolved": 3
+  },
+  "internal_references": {},
+  "edges": [
+    {
+      "from": "shopco",
+      "to": "shopco.orders",
+      "weight": 1,
+      "kinds": [
+        "static"
+      ],
+      "samples": [
+        "shopco/app.py -> shopco.orders.service"
+      ]
+    },
+    {
+      "from": "shopco",
+      "to": "shopco.reporting",
+      "weight": 1,
+      "kinds": [
+        "static"
+      ],
+      "samples": [
+        "shopco/app.py -> shopco.reporting.sales"
+      ]
+    },
+    {
+      "from": "shopco.inventory",
+      "to": "shopco.audit",
+      "weight": 1,
+      "kinds": [
+        "static"
+      ],
+      "samples": [
+        "shopco/inventory/stock.py -> shopco.audit.log"
+      ]
+    },
+    {
+      "from": "shopco.inventory",
+      "to": "shopco.orders",
+      "weight": 1,
+      "kinds": [
+        "static"
+      ],
+      "samples": [
+        "shopco/inventory/stock.py -> shopco.orders.service"
+      ]
+    },
+    {
+      "from": "shopco.orders",
+      "to": "shopco.audit",
+      "weight": 1,
+      "kinds": [
+        "static"
+      ],
+      "samples": [
+        "shopco/orders/service.py -> shopco.audit.log"
+      ]
+    },
+    {
+      "from": "shopco.orders",
+      "to": "shopco.customers",
+      "weight": 1,
+      "kinds": [
+        "static"
+      ],
+      "samples": [
+        "shopco/orders/service.py -> shopco.customers.profile"
+      ]
+    },
+    {
+      "from": "shopco.orders",
+      "to": "shopco.inventory",
+      "weight": 1,
+      "kinds": [
+        "static"
+      ],
+      "samples": [
+        "shopco/orders/service.py -> shopco.inventory.stock"
+      ]
+    },
+    {
+      "from": "shopco.orders",
+      "to": "shopco.notification",
+      "weight": 1,
+      "kinds": [
+        "static"
+      ],
+      "samples": [
+        "shopco/orders/service.py -> shopco.notification.email"
+      ]
+    },
+    {
+      "from": "shopco.orders",
+      "to": "shopco.orders.pricing",
+      "weight": 1,
+      "kinds": [
+        "static"
+      ],
+      "samples": [
+        "shopco/orders/service.py -> shopco.orders.pricing.calculator"
+      ]
+    },
+    {
+      "from": "shopco.payments",
+      "to": "shopco.audit",
+      "weight": 1,
+      "kinds": [
+        "static"
+      ],
+      "samples": [
+        "shopco/payments/gateway.py -> shopco.audit.log"
+      ]
+    },
+    {
+      "from": "shopco.payments",
+      "to": "shopco.notification",
+      "weight": 1,
+      "kinds": [
+        "static"
+      ],
+      "samples": [
+        "shopco/payments/gateway.py -> shopco.notification.email"
+      ]
+    },
+    {
+      "from": "shopco.reporting",
+      "to": "shopco.audit",
+      "weight": 1,
+      "kinds": [
+        "static"
+      ],
+      "samples": [
+        "shopco/reporting/sales.py -> shopco.audit.log"
+      ]
+    },
+    {
+      "from": "shopco.reporting",
+      "to": "shopco.customers",
+      "weight": 1,
+      "kinds": [
+        "static"
+      ],
+      "samples": [
+        "shopco/reporting/sales.py -> shopco.customers.profile"
+      ]
+    },
+    {
+      "from": "shopco.reporting",
+      "to": "shopco.inventory",
+      "weight": 1,
+      "kinds": [
+        "static"
+      ],
+      "samples": [
+        "shopco/reporting/sales.py -> shopco.inventory.stock"
+      ]
+    },
+    {
+      "from": "shopco.reporting",
+      "to": "shopco.orders",
+      "weight": 1,
+      "kinds": [
+        "static"
+      ],
+      "samples": [
+        "shopco/reporting/sales.py -> shopco.orders.service"
+      ]
+    },
+    {
+      "from": "shopco.reporting",
+      "to": "shopco.payments",
+      "weight": 1,
+      "kinds": [
+        "static"
+      ],
+      "samples": [
+        "shopco/reporting/sales.py -> shopco.payments.gateway"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dewyll/monolith-decomposition-skill/schemas/components.schema.json",
+  "title": "Component inventory",
+  "description": "Output of size_components.py (Phase 1 and 3). The 'raw input' accepted by --from-json is the same shape with only id, path, files and size required per component.",
+  "type": "object",
+  "required": [
+    "components"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "generator": {
+      "type": "object",
+      "required": [
+        "tool"
+      ],
+      "properties": {
+        "tool": {
+          "type": "string"
+        },
+        "metric": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low",
+            "unknown"
+          ]
+        },
+        "blind_spots": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "parameters": {
+      "type": "object"
+    },
+    "totals": {
+      "type": "object",
+      "properties": {
+        "components": {
+          "type": "integer"
+        },
+        "files": {
+          "type": "integer"
+        },
+        "size": {
+          "type": "integer"
+        }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "properties": {
+        "mean": {
+          "type": "number"
+        },
+        "stddev": {
+          "type": "number"
+        }
+      }
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "size"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Component id, e.g. 'billing.payment'"
+          },
+          "path": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Folder relative to the project root"
+          },
+          "language": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "files": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "percent": {
+            "type": "number"
+          },
+          "z_score": {
+            "type": "number"
+          },
+          "complexity": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "orphan_files": {
+            "type": "integer"
+          },
+          "orphan_file_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "flags": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "large",
+                "small",
+                "over-max",
+                "root-with-code"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "unassigned_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "unassigned_count": {
+      "type": "integer"
+    }
+  }
+}

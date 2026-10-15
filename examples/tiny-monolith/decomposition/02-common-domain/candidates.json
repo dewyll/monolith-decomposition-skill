@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-15T11:00:13+00:00",
+  "generator": {
+    "tool": "find_common_candidates.py",
+    "confidence": "medium",
+    "fan_in_signal": true
+  },
+  "candidates": [
+    {
+      "component": "shopco.audit",
+      "signals": [
+        "fan-in",
+        "keyword"
+      ],
+      "reasons": [
+        "name matches shared-concern keyword(s): audit",
+        "used by 4 components (threshold 3)"
+      ],
+      "size": 5,
+      "percent": 5.75,
+      "decision": null
+    },
+    {
+      "component": "shopco.notification",
+      "signals": [
+        "duplicate",
+        "keyword"
+      ],
+      "reasons": [
+        "name matches shared-concern keyword(s): notification",
+        "same leaf name as shopco.orders.notification"
+      ],
+      "size": 4,
+      "percent": 4.6,
+      "decision": null
+    },
+    {
+      "component": "shopco.orders.notification",
+      "signals": [
+        "duplicate",
+        "keyword"
+      ],
+      "reasons": [
+        "name matches shared-concern keyword(s): notification",
+        "same leaf name as shopco.notification"
+      ],
+      "size": 4,
+      "percent": 4.6,
+      "decision": null
+    },
+    {
+      "component": "shopco.orders",
+      "signals": [
+        "fan-in"
+      ],
+      "reasons": [
+        "used by 3 components (threshold 3)"
+      ],
+      "size": 26,
+      "percent": 29.89,
+      "decision": null
+    },
+    {
+      "component": "shopco.reporting",
+      "signals": [
+        "keyword"
+      ],
+      "reasons": [
+        "name matches shared-concern keyword(s): reporting"
+      ],
+      "size": 10,
+      "percent": 11.49,
+      "decision": null
+    }
+  ],
+  "duplicate_groups": [
+    {
+      "leaf": "notification",
+      "components": [
+        "shopco.notification",
+        "shopco.orders.notification"
+      ]
+    }
+  ]
+}

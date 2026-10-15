@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "project_root": "..",
+  "languages": [
+    "python"
+  ],
+  "source_roots": [
+    "."
+  ],
+  "include": [
+    "**/*"
+  ],
+  "exclude": [
+    "**/test/**",
+    "**/tests/**",
+    "**/__tests__/**",
+    "**/spec/**",
+    "**/testing/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/*_test.go",
+    "**/test_*.py",
+    "**/*_test.py",
+    "**/*Test.java",
+    "**/*Tests.java",
+    "**/*Test.kt",
+    "**/*Tests.cs",
+    "**/*Test.php",
+    "**/vendor/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/target/**",
+    "**/out/**",
+    "**/bin/**",
+    "**/obj/**",
+    "**/generated/**",
+    "**/*.generated.*",
+    "**/*.min.js",
+    "**/migrations/**"
+  ],
+  "extensions": [],
+  "import_aliases": {},
+  "components": {
+    "strategy": "directory",
+    "max_depth": null,
+    "separator": ".",
+    "explicit": []
+  },
+  "metrics": {
+    "size": "auto"
+  },
+  "thresholds": {
+    "size_outlier_stddev": 1.0,
+    "max_component_percent": 15.0,
+    "max_efferent_coupling": null,
+    "min_domain_cohesion": null,
+    "common_fan_in_ratio": 0.3
+  },
+  "common_keywords": [
+    "audit",
+    "auditing",
+    "log",
+    "logging",
+    "logger",
+    "notification",
+    "notifications",
+    "notify",
+    "email",
+    "mail",
+    "mailer",
+    "sms",
+    "util",
+    "utils",
+    "utility",
+    "common",
+    "shared",
+    "helper",
+    "helpers",
+    "validation",
+    "validator",
+    "formatter",
+    "security",
+    "auth",
+    "config",
+    "cache",
+    "messaging",
+    "events",
+    "i18n",
+    "pdf",
+    "report",
+    "reporting"
+  ],
+  "fitness": {
+    "size_allowlist": {},
+    "orphan_allowlist": {},
+    "allowed_cycles": [],
+    "forbidden_dependencies": []
+  },
+  "workspace": {
+    "rfc_dir": "rfcs"
+  }
+}

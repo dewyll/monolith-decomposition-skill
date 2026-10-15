@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dewyll/monolith-decomposition-skill/schemas/services.schema.json",
+  "title": "Domain services",
+  "description": "Phase 6 service map with declared cross-service interfaces.",
+  "type": "object",
+  "required": [
+    "services"
+  ],
+  "properties": {
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "domains"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "kind": {
+            "enum": [
+              "domain-service",
+              "shared-service",
+              "shared-library",
+              "monolith-remainder"
+            ]
+          },
+          "interfaces": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "to"
+              ],
+              "properties": {
+                "to": {
+                  "type": "string"
+                },
+                "style": {
+                  "enum": [
+                    "sync",
+                    "async",
+                    "library",
+                    "data"
+                  ]
+                },
+                "purpose": {
+                  "type": "string"
+                },
+                "rfc": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "data": {
+            "type": "string"
+          },
+          "extraction_order": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "owner": {
+            "type": "string"
+          },
+          "rfc": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
