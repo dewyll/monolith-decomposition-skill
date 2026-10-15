@@ -1,0 +1,29 @@
+graph LR
+  n_shopco_orders["shopco.orders"]
+  n_shopco_reporting["shopco.reporting"]
+  n_shopco_audit["shopco.audit"]
+  n_shopco_inventory["shopco.inventory"]
+  n_shopco_payments["shopco.payments"]
+  n_shopco["shopco"]
+  n_shopco_customers["shopco.customers"]
+  n_shopco_notification["shopco.notification"]
+  n_shopco_orders_pricing["shopco.orders.pricing"]
+  n_shopco_orders_notification["shopco.orders.notification"]
+  n_shopco -->|1| n_shopco_orders
+  n_shopco -->|1| n_shopco_reporting
+  n_shopco_inventory -->|1| n_shopco_audit
+  n_shopco_inventory -->|1| n_shopco_orders
+  n_shopco_orders -->|1| n_shopco_audit
+  n_shopco_orders -->|1| n_shopco_customers
+  n_shopco_orders -->|1| n_shopco_inventory
+  n_shopco_orders -->|1| n_shopco_notification
+  n_shopco_orders -->|1| n_shopco_orders_pricing
+  n_shopco_payments -->|1| n_shopco_audit
+  n_shopco_payments -->|1| n_shopco_notification
+  n_shopco_reporting -->|1| n_shopco_audit
+  n_shopco_reporting -->|1| n_shopco_customers
+  n_shopco_reporting -->|1| n_shopco_inventory
+  n_shopco_reporting -->|1| n_shopco_orders
+  n_shopco_reporting -->|1| n_shopco_payments
+  classDef cycle stroke:#d9534f,stroke-width:3px
+  class n_shopco_inventory,n_shopco_orders cycle

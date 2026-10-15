@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-15T11:00:23+00:00",
+  "generator": {
+    "tool": "extract_dependencies.py",
+    "method": "regex-static-imports",
+    "confidence": "low",
+    "blind_spots": [
+      "dependency injection",
+      "reflection",
+      "events/messages",
+      "framework autoloading",
+      "string-based lookups",
+      "shared database tables"
+    ]
+  },
+  "summary": {
+    "components": 10,
+    "edges": 16,
+    "density": 0.178,
+    "mean_ce": 1.6,
+    "stddev_ce": 1.91,
+    "cycles": 1,
+    "components_in_cycles": 2,
+    "share_in_cycles": 0.2,
+    "coupling_level_hint": "medium"
+  },
+  "cycles": [
+    {
+      "members": [
+        "shopco.inventory",
+        "shopco.orders"
+      ],
+      "allowed": false
+    }
+  ],
+  "components": [
+    {
+      "id": "shopco.orders",
+      "ca": 3,
+      "ce": 5,
+      "instability": 0.62,
+      "weighted_in": 3,
+      "weighted_out": 5,
+      "in_cycle": true,
+      "over_max_ce": false
+    },
+    {
+      "id": "shopco.reporting",
+      "ca": 1,
+      "ce": 5,
+      "instability": 0.83,
+      "weighted_in": 1,
+      "weighted_out": 5,
+      "in_cycle": false,
+      "over_max_ce": false
+    },
+    {
+      "id": "shopco.audit",
+      "ca": 4,
+      "ce": 0,
+      "instability": 0.0,
+      "weighted_in": 4,
+      "weighted_out": 0,
+      "in_cycle": false,
+      "over_max_ce": false
+    },
+    {
+      "id": "shopco.inventory",
+      "ca": 2,
+      "ce": 2,
+      "instability": 0.5,
+      "weighted_in": 2,
+      "weighted_out": 2,
+      "in_cycle": true,
+      "over_max_ce": false
+    },
+    {
+      "id": "shopco.payments",
+      "ca": 1,
+      "ce": 2,
+      "instability": 0.67,
+      "weighted_in": 1,
+      "weighted_out": 2,
+      "in_cycle": false,
+      "over_max_ce": false
+    },
+    {
+      "id": "shopco",
+      "ca": 0,
+      "ce": 2,
+      "instability": 1.0,
+      "weighted_in": 0,
+      "weighted_out": 2,
+      "in_cycle": false,
+      "over_max_ce": false
+    },
+    {
+      "id": "shopco.customers",
+      "ca": 2,
+      "ce": 0,
+      "instability": 0.0,
+      "weighted_in": 2,
+      "weighted_out": 0,
+      "in_cycle": false,
+      "over_max_ce": false
+    },
+    {
+      "id": "shopco.notification",
+      "ca": 2,
+      "ce": 0,
+      "instability": 0.0,
+      "weighted_in": 2,
+      "weighted_out": 0,
+      "in_cycle": false,
+      "over_max_ce": false
+    },
+    {
+      "id": "shopco.orders.pricing",
+      "ca": 1,
+      "ce": 0,
+      "instability": 0.0,
+      "weighted_in": 1,
+      "weighted_out": 0,
+      "in_cycle": false,
+      "over_max_ce": false
+    },
+    {
+      "id": "shopco.orders.notification",
+      "ca": 0,
+      "ce": 0,
+      "instability": null,
+      "weighted_in": 0,
+      "weighted_out": 0,
+      "in_cycle": false,
+      "over_max_ce": false
+    }
+  ],
+  "edges": [
+    {
+      "from": "shopco",
+      "to": "shopco.orders",
+      "weight": 1
+    },
+    {
+      "from": "shopco",
+      "to": "shopco.reporting",
+      "weight": 1
+    },
+    {
+      "from": "shopco.inventory",
+      "to": "shopco.audit",
+      "weight": 1
+    },
+    {
+      "from": "shopco.inventory",
+      "to": "shopco.orders",
+      "weight": 1
+    },
+    {
+      "from": "shopco.orders",
+      "to": "shopco.audit",
+      "weight": 1
+    },
+    {
+      "from": "shopco.orders",
+      "to": "shopco.customers",
+      "weight": 1
+    },
+    {
+      "from": "shopco.orders",
+      "to": "shopco.inventory",
+      "weight": 1
+    },
+    {
+      "from": "shopco.orders",
+      "to": "shopco.notification",
+      "weight": 1
+    },
+    {
+      "from": "shopco.orders",
+      "to": "shopco.orders.pricing",
+      "weight": 1
+    },
+    {
+      "from": "shopco.payments",
+      "to": "shopco.audit",
+      "weight": 1
+    },
+    {
+      "from": "shopco.payments",
+      "to": "shopco.notification",
+      "weight": 1
+    },
+    {
+      "from": "shopco.reporting",
+      "to": "shopco.audit",
+      "weight": 1
+    },
+    {
+      "from": "shopco.reporting",
+      "to": "shopco.customers",
+      "weight": 1
+    },
+    {
+      "from": "shopco.reporting",
+      "to": "shopco.inventory",
+      "weight": 1
+    },
+    {
+      "from": "shopco.reporting",
+      "to": "shopco.orders",
+      "weight": 1
+    },
+    {
+      "from": "shopco.reporting",
+      "to": "shopco.payments",
+      "weight": 1
+    }
+  ],
+  "internal_references": {}
+}

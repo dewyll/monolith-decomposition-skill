@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dewyll/monolith-decomposition-skill/schemas/common-domain.schema.json",
+  "title": "Common domain decisions",
+  "description": "Decisions taken with the user in Phase 2 for each candidate in candidates.json.",
+  "type": "object",
+  "required": [
+    "decisions"
+  ],
+  "properties": {
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "component",
+          "decision"
+        ],
+        "properties": {
+          "component": {
+            "type": "string"
+          },
+          "decision": {
+            "enum": [
+              "consolidate",
+              "keep separate",
+              "not common"
+            ]
+          },
+          "target": {
+            "type": "string",
+            "description": "Target shared component when consolidating"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rfc": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

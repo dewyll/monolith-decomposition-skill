@@ -1,0 +1,13 @@
+{
+  "name": "monolith-decomposition",
+  "version": "0.1.0",
+  "description": "Phased, evidence-based monolith to microservices decomposition for any language: component sizing, dependency analysis, domain and service mapping, architecture RFCs and fitness functions.",
+  "author": {
+    "name": "Denys Wylliam",
+    "url": "https://github.com/dewyll"
+  },
+  "homepage": "https://github.com/dewyll/monolith-decomposition-skill",
+  "repository": "https://github.com/dewyll/monolith-decomposition-skill",
+  "license": "MIT",
+  "keywords": ["monolith", "microservices", "software-architecture", "decomposition", "fitness-functions", "rfc", "adr", "ddd", "modular-monolith"]
+}

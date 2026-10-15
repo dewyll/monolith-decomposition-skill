@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dewyll/monolith-decomposition-skill/schemas/state.schema.json",
+  "title": "Decomposition state",
+  "description": "decomposition/state.json, managed by state.py.",
+  "type": "object",
+  "required": [
+    "phases",
+    "current_phase",
+    "history"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "approach": {
+      "enum": [
+        null,
+        "component-based",
+        "tactical-forking"
+      ]
+    },
+    "current_phase": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 6
+    },
+    "phases": {
+      "type": "object",
+      "patternProperties": {
+        "^[0-6]$": {
+          "type": "object",
+          "required": [
+            "name",
+            "status",
+            "iteration"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "not_started",
+                "in_progress",
+                "awaiting_review",
+                "approved",
+                "stale"
+              ]
+            },
+            "iteration": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "rfcs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "updated_at": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "approved_by": {
+              "type": "string"
+            },
+            "approved_at": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  }
+}

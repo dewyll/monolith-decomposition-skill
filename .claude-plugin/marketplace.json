@@ -1,0 +1,15 @@
+{
+  "name": "dewyll-skills",
+  "description": "Agent skills by Denys Wylliam for software architecture work.",
+  "owner": {
+    "name": "Denys Wylliam",
+    "url": "https://github.com/dewyll"
+  },
+  "plugins": [
+    {
+      "name": "monolith-decomposition",
+      "source": "./plugins/monolith-decomposition",
+      "description": "Phased, evidence-based monolith to microservices decomposition for any language, with RFCs and fitness functions at every step."
+    }
+  ]
+}
