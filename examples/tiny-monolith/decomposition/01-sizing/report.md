@@ -7,7 +7,8 @@ Iteration 1 · 2026-10-15
 Ten components, every file mapped. `shopco.orders` is the only real
 outlier: almost a third of the code, and it sits above two sub-components.
 Everything else is between 4.6% and 12.6%. Recommendation: keep the default
-thresholds and fix `orders` in Phase 3 rather than allow-listing it.
+thresholds and split `orders` in Phase 3; allow-list it until then, with
+the RFC that says when the entry goes away.
 
 ## Key numbers
 
@@ -38,8 +39,8 @@ thresholds and fix `orders` in Phase 3 rather than allow-listing it.
 | Check | Status | Notes |
 |---|---|---|
 | F1.1 | PASS | all files mapped |
-| F1.2 | FAIL | `shopco.orders` 29.9%, fixed in Phase 3 |
-| F1.3 | WARN | same component |
+| F1.2 | PASS | `shopco.orders` (29.9%) allow-listed until the Phase 3 push-down |
+| F1.3 | PASS | same component, same allow-list entry |
 
 ## Artifacts
 

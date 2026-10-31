@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dewyll/monolith-decomposition-skill/schemas/baseline.schema.json",
+  "title": "Fitness baseline",
+  "description": "fitness/baseline.json written by check_fitness.py --update-baseline: the edges and cycles accepted as the starting point of the ratchet.",
+  "type": "object",
+  "required": [
+    "edges",
+    "cycles"
+  ],
+  "properties": {
+    "generated_at": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "generator": {
+      "type": "object"
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 2,
+        "maxItems": 2
+      }
+    },
+    "cycles": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 2
+      }
+    }
+  }
+}

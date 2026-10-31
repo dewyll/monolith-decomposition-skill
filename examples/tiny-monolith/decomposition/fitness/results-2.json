@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-10-31T18:29:13+00:00",
+  "phase": "2",
+  "strict": false,
+  "baseline": null,
+  "passed": true,
+  "results": [
+    {
+      "id": "F2.1",
+      "status": "PASS",
+      "message": "every candidate has a decision",
+      "details": []
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-10-31T18:31:10+00:00",
+  "phase": "6",
+  "strict": false,
+  "baseline": "fitness/baseline.json",
+  "passed": true,
+  "results": [
+    {
+      "id": "F6.1",
+      "status": "PASS",
+      "message": "every domain in exactly one service",
+      "details": []
+    },
+    {
+      "id": "F6.2",
+      "status": "PASS",
+      "message": "every cross-service dependency is declared",
+      "details": []
+    }
+  ]
+}

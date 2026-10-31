@@ -1,0 +1,95 @@
+{
+  "generated_at": "2026-10-31T18:31:10+00:00",
+  "phase": "guard",
+  "strict": false,
+  "baseline": "fitness/baseline.json",
+  "passed": true,
+  "results": [
+    {
+      "id": "F1.1",
+      "status": "PASS",
+      "message": "all source files mapped to a component",
+      "details": []
+    },
+    {
+      "id": "F1.2",
+      "status": "PASS",
+      "message": "no component above the max share",
+      "details": []
+    },
+    {
+      "id": "F1.3",
+      "status": "PASS",
+      "message": "every size outlier is justified",
+      "details": []
+    },
+    {
+      "id": "F3.1",
+      "status": "PASS",
+      "message": "no orphaned files in root namespaces",
+      "details": []
+    },
+    {
+      "id": "F4.1",
+      "status": "WARN",
+      "message": "1 cycle(s) remain, all frozen in the baseline",
+      "details": [
+        "shopco.inventory <-> shopco.orders"
+      ]
+    },
+    {
+      "id": "F4.2",
+      "status": "SKIP",
+      "message": "thresholds.max_efferent_coupling not set",
+      "details": []
+    },
+    {
+      "id": "F4.3",
+      "status": "WARN",
+      "message": "dependency data confidence: low",
+      "details": []
+    },
+    {
+      "id": "F4.4",
+      "status": "PASS",
+      "message": "no new component dependencies since the baseline",
+      "details": []
+    },
+    {
+      "id": "F5.1",
+      "status": "PASS",
+      "message": "every component in exactly one domain",
+      "details": []
+    },
+    {
+      "id": "F5.2",
+      "status": "PASS",
+      "message": "all ids known",
+      "details": []
+    },
+    {
+      "id": "F5.3",
+      "status": "SKIP",
+      "message": "domain-coupling.json or thresholds.min_domain_cohesion missing",
+      "details": []
+    },
+    {
+      "id": "F5.4",
+      "status": "PASS",
+      "message": "no forbidden dependencies",
+      "details": []
+    },
+    {
+      "id": "F6.1",
+      "status": "PASS",
+      "message": "every domain in exactly one service",
+      "details": []
+    },
+    {
+      "id": "F6.2",
+      "status": "PASS",
+      "message": "every cross-service dependency is declared",
+      "details": []
+    }
+  ]
+}

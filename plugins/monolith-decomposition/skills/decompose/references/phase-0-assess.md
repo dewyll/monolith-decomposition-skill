@@ -32,6 +32,15 @@ The choice changes every later step, so it is the first RFC.
        --out-dir decomposition/00-assessment/probe
    ```
 
+   If the project is a git repository, add churn and change coupling to the
+   probe; it shows where the work actually happens and which parts move
+   together:
+
+   ```bash
+   python3 "$SKILL_DIR/scripts/change_coupling.py" --workspace decomposition \
+       --edges decomposition/00-assessment/probe/edges.json --out-dir 00-assessment/probe
+   ```
+
 3. Ask the user about **why** they are migrating. The drivers decide what a
    good boundary looks like later on. Typical drivers: independent
    deployability, scaling one part differently, fault isolation, team
@@ -51,6 +60,7 @@ The choice changes every later step, so it is the first RFC.
 | Graph density | low | high |
 | Size distribution | a few outliers | one component holds most of the code |
 | Test coverage | decent (refactoring is safe) | poor (moving code is risky) |
+| Change coupling (if measured) | changes stay inside components | most commits touch many components |
 | Team need | steady, controlled extraction | many teams must start in parallel now |
 
 These are heuristics. A codebase can sit in the middle; say so, and choose

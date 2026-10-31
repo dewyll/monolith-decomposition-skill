@@ -1,0 +1,33 @@
+{
+  "moves": [
+    {
+      "files": [
+        "shopco/orders/service.py"
+      ],
+      "to_component": "shopco.orders.core",
+      "option": "push down",
+      "rfc": "0004"
+    },
+    {
+      "files": [
+        "shopco/orders/__init__.py"
+      ],
+      "to_component": "shopco.orders.core",
+      "option": "push down",
+      "rfc": "0004",
+      "note": "package marker moves with the code"
+    }
+  ],
+  "kept": [
+    {
+      "component": "shopco",
+      "files": [
+        "shopco/__init__.py",
+        "shopco/app.py"
+      ],
+      "reason": "entry point / composition root",
+      "rfc": "0004"
+    }
+  ],
+  "status": "accepted; executed as the first step of extracting ordering-service (RFC-0008)"
+}

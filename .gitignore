@@ -7,3 +7,5 @@ venv/
 .vscode/
 # scratch workspaces created when trying the example
 examples/**/scratch/
+# eval results (claude plugin eval)
+plugins/*/evals/results/

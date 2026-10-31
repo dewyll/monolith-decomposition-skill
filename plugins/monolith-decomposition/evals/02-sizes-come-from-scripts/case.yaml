@@ -1,0 +1,41 @@
+schema_version: "1.0"
+name: 02-sizes-come-from-scripts
+description: >
+  Asked a sizing question, the agent measures with the skill's script
+  instead of estimating, and reports the outlier with real numbers.
+tags: [numbers, phase-1]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: |
+    Which component of this codebase is too big? Give me the numbers.
+  max_turns: 30
+  timeout_seconds: 600
+  allowed_tools: [Skill, Bash, Read, Write, Edit, Glob, Grep]
+runs: 2
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    arm: with-only
+  - name: ran-sizing-script
+    type: tool_used
+    tool: Bash
+    input_match: size_components
+  - name: names-orders
+    type: regex
+    target: last_message
+    pattern: 'shopco\.orders|orders'
+  - name: quotes-measured-share
+    type: regex
+    target: last_message
+    pattern: '29\.9|30\s?%'
+  - name: numbers-not-adjectives
+    type: llm
+    focus: last_message
+    criteria: |
+      1. The answer identifies shopco.orders as the oversized component.
+      2. It backs this with numbers produced by a measurement (share of the
+         codebase around 29.9% and/or a z-score around 2.7), not with
+         adjectives or guesses.
+      3. It does not move, rename or delete any source file.

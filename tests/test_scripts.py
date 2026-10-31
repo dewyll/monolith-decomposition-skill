@@ -156,17 +156,199 @@ class TinyMonolithPipeline(unittest.TestCase):
         run("new_rfc.py", "--workspace", self.ws, "--set-status", "1", "Accepted")
         self.assertIn("| Accepted |", (self.ws / "rfcs" / "index.md").read_text())
 
+        state = lambda: json.loads((self.ws / "state.json").read_text())  # noqa: E731
+        run("state.py", "--workspace", self.ws, "start", "0")
+        run("state.py", "--workspace", self.ws, "review", "0", "--rfc", "0001")
+        run("state.py", "--workspace", self.ws, "approve", "0")
+        # phase 1: fitness fails on the messy example (F1.2), so approval is refused
         run("state.py", "--workspace", self.ws, "start", "1")
         self.assertNotEqual(run("state.py", "--workspace", self.ws, "approve", "1", check=False).returncode, 0)
+        run("check_fitness.py", "--workspace", self.ws, "--phase", "1", check=False)
         run("state.py", "--workspace", self.ws, "review", "1", "--rfc", "0001")
-        run("state.py", "--workspace", self.ws, "approve", "1")
+        refused = run("state.py", "--workspace", self.ws, "approve", "1", check=False)
+        self.assertNotEqual(refused.returncode, 0)
+        self.assertIn("F1.2", refused.stderr)
+        no_reason = run("state.py", "--workspace", self.ws, "approve", "1", "--force", check=False)
+        self.assertIn("--reason", no_reason.stderr)
+        run("state.py", "--workspace", self.ws, "approve", "1", "--force", "--reason", "test override")
+        self.assertTrue(state()["history"][-1]["forced"])
+        # phase 2 cannot be reviewed before it starts; phase 3 cannot start before 2 is approved
+        self.assertNotEqual(run("state.py", "--workspace", self.ws, "review", "2", check=False).returncode, 0)
         run("state.py", "--workspace", self.ws, "start", "2")
-        run("state.py", "--workspace", self.ws, "review", "2")
-        run("state.py", "--workspace", self.ws, "approve", "2")
+        self.assertNotEqual(run("state.py", "--workspace", self.ws, "start", "3", check=False).returncode, 0)
         run("state.py", "--workspace", self.ws, "reopen", "1", "--reason", "test")
-        state = json.loads((self.ws / "state.json").read_text())
-        self.assertEqual(state["phases"]["2"]["status"], "stale")
-        self.assertEqual(state["phases"]["1"]["iteration"], 2)
+        self.assertEqual(state()["phases"]["2"]["status"], "stale")
+        self.assertEqual(state()["phases"]["1"]["iteration"], 2)
+
+    def test_state_rejects_unaccepted_rfc_and_tactical_forking(self):
+        ws = fresh_pipeline(self)
+        run("new_rfc.py", "--workspace", ws, "--title", "Approach", "--phase", "0")
+        run("state.py", "--workspace", ws, "start", "0")
+        run("state.py", "--workspace", ws, "review", "0", "--rfc", "1")
+        out = run("state.py", "--workspace", ws, "approve", "0", check=False)
+        self.assertNotEqual(out.returncode, 0)
+        self.assertIn("RFC-0001 is 'Proposed'", out.stderr)
+        run("new_rfc.py", "--workspace", ws, "--set-status", "1", "Accepted")
+        run("state.py", "--workspace", ws, "approach", "tactical-forking")
+        run("state.py", "--workspace", ws, "approve", "0")
+        out = run("state.py", "--workspace", ws, "start", "1", check=False)
+        self.assertNotEqual(out.returncode, 0)
+        self.assertIn("tactical", out.stderr)
+
+
+def fresh_pipeline(test):
+    """A private copy of the example with sizing, edges and analysis, for tests that mutate it."""
+    tmp = Path(tempfile.mkdtemp())
+    test.addCleanup(shutil.rmtree, tmp)
+    proj = tmp / "tiny"
+    shutil.copytree(EXAMPLE, proj, ignore=shutil.ignore_patterns("decomposition", "__pycache__"))
+    ws = proj / "decomposition"
+    run("init_workspace.py", proj)
+    run("size_components.py", "--workspace", ws)
+    run("extract_dependencies.py", "--workspace", ws)
+    run("analyze_dependencies.py", "--workspace", ws)
+    return ws
+
+
+class BaselineAndGuard(unittest.TestCase):
+    def test_baseline_freezes_cycle_and_fails_on_new_edges(self):
+        ws = fresh_pipeline(self)
+        run("check_fitness.py", "--workspace", ws, "--update-baseline")
+        out = run("check_fitness.py", "--workspace", ws, "--phase", "4").stdout
+        self.assertIn("[WARN] F4.1", out)
+        self.assertIn("[PASS] F4.4", out)
+        # a new dependency that also grows the cycle
+        with open(ws.parent / "shopco" / "customers" / "profile.py", "a") as fh:
+            fh.write("\nfrom shopco.orders.service import ORDERS\n")
+        run("extract_dependencies.py", "--workspace", ws)
+        run("analyze_dependencies.py", "--workspace", ws)
+        proc = run("check_fitness.py", "--workspace", ws, "--phase", "4", check=False)
+        self.assertEqual(proc.returncode, 1)
+        self.assertIn("[FAIL] F4.1", proc.stdout)
+        self.assertIn("shopco.customers -> shopco.orders", proc.stdout)
+        self.assertIn("[FAIL] F4.4", proc.stdout)
+        self.assertIn("shopco.customers -> shopco.orders", proc.stdout.split("F4.4", 1)[1])
+
+    def test_run_guard_on_committed_example_passes(self):
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp)
+        shutil.copytree(EXAMPLE, tmp / "tiny", ignore=shutil.ignore_patterns("__pycache__", "scratch"))
+        proc = run("run_guard.py", "--workspace", tmp / "tiny" / "decomposition", check=False)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertIn("[PASS] F6.2", proc.stdout)
+
+    def test_committed_example_is_complete(self):
+        state = json.loads((EXAMPLE / "decomposition" / "state.json").read_text())
+        self.assertEqual({p["status"] for p in state["phases"].values()}, {"approved"})
+
+
+class AnalysisTest(unittest.TestCase):
+    def workspace(self, files):
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp)
+        write(tmp, files)
+        run("init_workspace.py", tmp)
+        ws = tmp / "decomposition"
+        run("size_components.py", "--workspace", ws)
+        return tmp, ws
+
+    def test_cut_candidates_pick_lightest_edges(self):
+        tmp, ws = self.workspace({"src/a/x.py": "x = 1\n", "src/b/x.py": "x = 1\n", "src/c/x.py": "x = 1\n"})
+        edges = {"generator": {"tool": "test", "confidence": "high"}, "edges": [
+            {"from": "a", "to": "b", "weight": 5}, {"from": "b", "to": "c", "weight": 4},
+            {"from": "c", "to": "a", "weight": 1}, {"from": "b", "to": "a", "weight": 3}]}
+        (ws / "04-dependencies").mkdir(parents=True, exist_ok=True)
+        (ws / "04-dependencies" / "edges.json").write_text(json.dumps(edges))
+        run("analyze_dependencies.py", "--workspace", ws)
+        deps = json.loads((ws / "04-dependencies" / "dependencies.json").read_text())
+        cuts = {(c["from"], c["to"]) for c in deps["cycles"][0]["cut_candidates"]}
+        self.assertEqual(cuts, {("c", "a"), ("b", "a")})
+        self.assertIn("cheapest cut", (ws / "04-dependencies" / "dependencies.md").read_text())
+
+    def test_data_coupling_and_extra_edges(self):
+        tmp, ws = self.workspace({
+            "src/orders/model.py": 'class Order:\n    __tablename__ = "orders"\n',
+            "src/billing/repo.py": 'from x import y  # FROM fake\nQ = """SELECT id FROM orders JOIN invoices ON 1=1"""\n'
+                                   'T = "update me from home"\n',
+            "src/stock/Repo.java": '@Table(name = "stock")\nclass S { String q = "DELETE FROM orders WHERE 1"; }\n',
+            "schema.sql": "CREATE TABLE orders (id int);\nCREATE TABLE invoices (id int);\nCREATE TABLE stock (id int);\n",
+        })
+        run("find_data_coupling.py", "--workspace", ws, "--schema", tmp / "schema.sql")
+        dc = json.loads((ws / "04-dependencies" / "data-coupling.json").read_text())
+        self.assertEqual(dc["tables"]["orders"]["owners"], ["orders"])
+        self.assertEqual(dc["tables"]["orders"]["users"], ["billing", "stock"])
+        self.assertNotIn("fake", dc["tables"])
+        run("extract_dependencies.py", "--workspace", ws)
+        run("analyze_dependencies.py", "--workspace", ws, "--extra-edges", ws / "04-dependencies" / "data-edges.json")
+        deps = json.loads((ws / "04-dependencies" / "dependencies.json").read_text())
+        self.assertIn({"from": "billing", "to": "orders", "weight": 1, "kinds": ["database"]}, deps["edges"])
+
+    def test_change_coupling_flags_hidden_pairs(self):
+        if shutil.which("git") is None:
+            self.skipTest("git not installed")
+        tmp, ws = self.workspace({"app/orders/o.py": "x = 0\n", "app/billing/b.py": "y = 0\n",
+                                  "app/stock/s.py": "z = 0\n"})
+        git = lambda *a: subprocess.run(["git", "-C", str(tmp), *a], check=True, capture_output=True)  # noqa: E731
+        git("init", "-q")
+        git("config", "user.email", "t@example.invalid")
+        git("config", "user.name", "t")
+        for i in range(4):
+            (tmp / "app/orders/o.py").write_text(f"x = {i}\n")
+            (tmp / "app/billing/b.py").write_text(f"y = {i}\n")
+            git("add", "-A")
+            git("commit", "-qm", f"c{i}")
+        (tmp / "app/stock/s.py").write_text("z = 1\n")
+        git("add", "-A")
+        git("commit", "-qm", "stock")
+        run("extract_dependencies.py", "--workspace", ws)
+        run("change_coupling.py", "--workspace", ws, "--since", "", "--min-shared", "2")
+        cc = json.loads((ws / "04-dependencies" / "change-coupling.json").read_text())
+        self.assertEqual(len(cc["pairs"]), 1)
+        pair = cc["pairs"][0]
+        self.assertEqual((pair["a"], pair["b"], pair["shared_commits"]), ("billing", "orders", 4))
+        self.assertIs(pair["static_dependency"], False)
+
+    def test_suggest_domains_finds_two_clusters(self):
+        files = {f"src/{c}/m.py": "x = 1\n" for c in ("a1", "a2", "a3", "b1", "b2", "b3")}
+        tmp, ws = self.workspace(files)
+        pairs = [("a1", "a2"), ("a2", "a3"), ("a1", "a3"), ("b1", "b2"), ("b2", "b3"), ("b1", "b3")]
+        edges = [{"from": x, "to": y, "weight": 3} for x, y in pairs] + [{"from": "a1", "to": "b1", "weight": 1}]
+        (ws / "04-dependencies").mkdir(parents=True, exist_ok=True)
+        (ws / "04-dependencies" / "edges.json").write_text(json.dumps({"generator": {"tool": "t"}, "edges": edges}))
+        run("analyze_dependencies.py", "--workspace", ws)
+        run("suggest_domains.py", "--workspace", ws, "--write-draft")
+        sug = json.loads((ws / "05-domains" / "domain-suggestions.json").read_text())
+        groups = sorted(sorted(s["components"]) for s in sug["suggestions"])
+        self.assertEqual(groups, [["a1", "a2", "a3"], ["b1", "b2", "b3"]])
+        self.assertGreater(sug["modularity"], 0.3)
+        self.assertFalse((ws / "05-domains" / "domains.json").exists())
+        self.assertTrue((ws / "05-domains" / "domains.draft.json").exists())
+
+
+class PythonImportParsing(unittest.TestCase):
+    def setUp(self):
+        from extract_dependencies import imports_for
+        self.imports_for = imports_for
+
+    def test_parenthesised_multiline_import(self):
+        out = self.imports_for("python", "from shop.orders import (\n    pricing,  # x\n    notify,\n)\n")
+        self.assertIn(("ns", "shop.orders.pricing"), out)
+        self.assertIn(("ns", "shop.orders.notify"), out)
+
+    def test_trailing_comment_and_docstring(self):
+        out = self.imports_for("python", 'import shop.audit  # noqa\n"""\nimport shop.fake\n"""\n')
+        self.assertEqual(out, [("ns", "shop.audit")])
+
+    def test_regex_fallback_for_unparsable_files(self):
+        out = self.imports_for("python", 'print "py2"\nfrom a.b import (\n c,\n d)\nimport e  # z\n')
+        self.assertTrue({("ns", "a.b.c"), ("ns", "a.b.d"), ("ns", "e")} <= set(out))
+
+    def test_comments_ignored_in_other_languages(self):
+        self.assertEqual(self.imports_for("typescript", 'const u = "http://x"; // import y from "./b"\n'
+                                                        '/* import z from "./c" */\nimport w from "./w"\n'),
+                         [("path", "./w")])
+        self.assertEqual(self.imports_for("java", "// import com.x.Y;\nimport com.a.B; // c\n"), [("ns", "com.a.B")])
+        self.assertEqual(self.imports_for("c", '#include "a.h"\n// #include "b.h"\n'), [("include", "a.h")])
 
 
 class ExtractorLanguages(unittest.TestCase):
@@ -282,6 +464,26 @@ class SchemaTest(unittest.TestCase):
         for artifact, schema in [("config.json", "config"), ("state.json", "state"),
                                  ("01-sizing/components.json", "components"),
                                  ("04-dependencies/edges.json", "edges")]:
+            with self.subTest(artifact=artifact):
+                jsonschema.validate(json.loads((ws / artifact).read_text()),
+                                    json.loads((schemas / f"{schema}.schema.json").read_text()))
+
+    def test_committed_example_matches_schemas(self):
+        try:
+            import jsonschema
+        except ImportError:
+            self.skipTest("jsonschema not installed")
+        schemas = SCRIPTS.parent / "schemas"
+        ws = EXAMPLE / "decomposition"
+        for artifact, schema in [("config.json", "config"), ("state.json", "state"),
+                                 ("01-sizing/components.json", "components"),
+                                 ("02-common-domain/common-domain.json", "common-domain"),
+                                 ("04-dependencies/edges.json", "edges"),
+                                 ("05-domains/domains.json", "domains"),
+                                 ("05-domains/domains.draft.json", "domains"),
+                                 ("05-domains/domain-suggestions.json", "domain-suggestions"),
+                                 ("06-services/services.json", "services"),
+                                 ("fitness/baseline.json", "baseline")]:
             with self.subTest(artifact=artifact):
                 jsonschema.validate(json.loads((ws / artifact).read_text()),
                                     json.loads((schemas / f"{schema}.schema.json").read_text()))

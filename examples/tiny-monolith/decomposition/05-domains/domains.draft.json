@@ -1,0 +1,32 @@
+{
+  "domains": [
+    {
+      "id": "reporting",
+      "components": [
+        "shopco",
+        "shopco.customers",
+        "shopco.payments",
+        "shopco.reporting"
+      ],
+      "description": "DRAFT from suggest_domains.py: rename and confirm with the user"
+    },
+    {
+      "id": "orders",
+      "components": [
+        "shopco.inventory",
+        "shopco.orders",
+        "shopco.orders.pricing"
+      ],
+      "description": "DRAFT from suggest_domains.py: rename and confirm with the user"
+    },
+    {
+      "id": "shared",
+      "components": [
+        "shopco.audit",
+        "shopco.notification",
+        "shopco.orders.notification"
+      ],
+      "description": "DRAFT: shared code left out of clustering"
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dewyll/monolith-decomposition-skill/schemas/change-coupling.schema.json",
+  "title": "Change coupling",
+  "description": "Churn and co-change from git history, written by change_coupling.py.",
+  "type": "object",
+  "required": [
+    "generator",
+    "components",
+    "pairs"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "generator": {
+      "type": "object",
+      "required": [
+        "tool"
+      ],
+      "properties": {
+        "tool": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "since": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "max_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "min_shared": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "min_degree": {
+          "type": "number"
+        }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer"
+      }
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "commits"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "commits": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "file_changes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "authors": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "pairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "a",
+          "b",
+          "shared_commits",
+          "degree"
+        ],
+        "properties": {
+          "a": {
+            "type": "string"
+          },
+          "b": {
+            "type": "string"
+          },
+          "shared_commits": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "degree": {
+            "type": "number",
+            "minimum": 0
+          },
+          "static_dependency": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

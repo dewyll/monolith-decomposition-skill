@@ -1,0 +1,131 @@
+{
+  "services": [
+    {
+      "id": "payment-service",
+      "name": "Payment service",
+      "domains": [
+        "payment"
+      ],
+      "kind": "domain-service",
+      "interfaces": [
+        {
+          "to": "platform-lib",
+          "style": "library",
+          "rfc": "0003"
+        }
+      ],
+      "data": "own schema for charges and refunds; reads nothing from other domains",
+      "extraction_order": 1,
+      "owner": "payments team",
+      "rfc": "0007"
+    },
+    {
+      "id": "reporting-service",
+      "name": "Reporting service",
+      "domains": [
+        "reporting"
+      ],
+      "kind": "domain-service",
+      "interfaces": [
+        {
+          "to": "ordering-service",
+          "style": "async",
+          "purpose": "order.placed / order.cancelled events feed the read model",
+          "rfc": "0007"
+        },
+        {
+          "to": "payment-service",
+          "style": "async",
+          "purpose": "payment.charged events; no direct calls to charge()",
+          "rfc": "0007"
+        },
+        {
+          "to": "customer-service",
+          "style": "sync",
+          "purpose": "customer count and tiers for reports",
+          "rfc": "0007"
+        },
+        {
+          "to": "platform-lib",
+          "style": "library",
+          "rfc": "0003"
+        }
+      ],
+      "data": "read model built from events; reads the monolith database read-only until then",
+      "extraction_order": 2,
+      "rfc": "0007"
+    },
+    {
+      "id": "customer-service",
+      "name": "Customer service",
+      "domains": [
+        "customer"
+      ],
+      "kind": "domain-service",
+      "interfaces": [],
+      "data": "owns the customers table",
+      "extraction_order": 3,
+      "rfc": "0007"
+    },
+    {
+      "id": "ordering-service",
+      "name": "Ordering service",
+      "domains": [
+        "ordering"
+      ],
+      "kind": "domain-service",
+      "interfaces": [
+        {
+          "to": "customer-service",
+          "style": "sync",
+          "purpose": "load customer tier and e-mail when placing an order",
+          "rfc": "0007"
+        },
+        {
+          "to": "platform-lib",
+          "style": "library",
+          "rfc": "0003"
+        }
+      ],
+      "data": "shares the monolith database until data decomposition; owns orders and stock tables",
+      "extraction_order": 4,
+      "owner": "checkout team",
+      "rfc": "0007"
+    },
+    {
+      "id": "platform-lib",
+      "name": "Platform library",
+      "domains": [
+        "platform"
+      ],
+      "kind": "shared-library",
+      "interfaces": [],
+      "data": "none",
+      "rfc": "0003"
+    },
+    {
+      "id": "shop-shell",
+      "name": "Shop shell",
+      "domains": [
+        "shell"
+      ],
+      "kind": "monolith-remainder",
+      "interfaces": [
+        {
+          "to": "ordering-service",
+          "style": "sync",
+          "purpose": "place orders (routed to the service once extracted)",
+          "rfc": "0007"
+        },
+        {
+          "to": "reporting-service",
+          "style": "sync",
+          "purpose": "daily report",
+          "rfc": "0007"
+        }
+      ],
+      "data": "none of its own",
+      "rfc": "0007"
+    }
+  ]
+}

@@ -14,17 +14,30 @@ Per component it computes:
 and for the whole graph: strongly connected components (cycles), density,
 the share of components caught in cycles, and a feasibility hint.
 
+For every cycle it also proposes *cut candidates*: a small set of the
+lightest edges whose removal makes that group acyclic (a greedy feedback
+arc set). They are where breaking the cycle is likely cheapest, a starting
+point for the cycle RFCs rather than a verdict.
+
+Extra edge files (database, runtime, co-change or hand-made edges in the
+same neutral format) are merged in with --extra-edges, or listed once in
+config.json under dependencies.extra_edges so every run picks them up.
+Weights are summed and kinds kept, so the report shows where an edge came
+from.
+
 With --domains it also aggregates edges to domain level and reports
 cohesion (share of a domain's references that stay inside the domain).
 
 Usage:
   python3 analyze_dependencies.py --workspace decomposition \
-      [--edges 04-dependencies/edges.json] [--components ...] [--domains 05-domains/domains.json]
+      [--edges 04-dependencies/edges.json] [--extra-edges 04-dependencies/data-edges.json ...] \
+      [--components ...] [--domains 05-domains/domains.json]
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -78,6 +91,57 @@ def tarjan(nodes, adj):
     return result
 
 
+def cut_candidates(members, weights):
+    """Greedy weighted feedback arc set inside one strongly connected group.
+
+    Repeatedly drop the lightest edge that still sits on a cycle, then try
+    to put back the heaviest dropped edges that are not needed. Every edge
+    inside an SCC lies on some cycle, so this only looks at internal edges.
+    """
+    inside = set(members)
+    edges = {k: w for k, w in weights.items() if k[0] in inside and k[1] in inside}
+    remaining = dict(edges)
+
+    def sccs_of(es):
+        adj = defaultdict(set)
+        for a, b in es:
+            adj[a].add(b)
+        return [g for g in tarjan(sorted(inside), adj) if len(g) > 1]
+
+    removed = []
+    while True:
+        groups = sccs_of(remaining)
+        if not groups:
+            break
+        where = {n: i for i, g in enumerate(groups) for n in g}
+        cand = [(w, a, b) for (a, b), w in remaining.items()
+                if a in where and where.get(b) == where[a]]
+        w, a, b = min(cand)
+        del remaining[(a, b)]
+        removed.append((a, b))
+    for e in sorted(removed, key=lambda e: (-edges[e], e)):
+        trial = dict(remaining)
+        trial[e] = edges[e]
+        if not sccs_of(trial):
+            remaining = trial
+            removed.remove(e)
+    return [{"from": a, "to": b, "weight": edges[(a, b)]} for a, b in sorted(removed)]
+
+
+def merge_edges(primary, extras):
+    """Merge extra edge documents into the primary edge list (weights summed, kinds kept)."""
+    merged = {}
+    for doc in [primary] + [d for _, d in extras]:
+        default_kind = None if doc is primary else (doc.get("generator", {}).get("kind") or "runtime")
+        for e in doc.get("edges", []):
+            key = (e["from"], e["to"])
+            m = merged.setdefault(key, {"from": key[0], "to": key[1], "weight": 0, "kinds": set()})
+            m["weight"] += int(e.get("weight", 1))
+            kinds = e.get("kinds") or ([default_kind] if default_kind else ["static"])
+            m["kinds"].update(kinds)
+    return [dict(v, kinds=sorted(v["kinds"])) for _, v in sorted(merged.items())]
+
+
 def mermaid_id(name: str) -> str:
     return "n_" + "".join(ch if ch.isalnum() else "_" for ch in name)
 
@@ -85,11 +149,13 @@ def mermaid_id(name: str) -> str:
 def analyse(nodes, edges, generator, allowed_cycles, max_ce):
     adj = defaultdict(set)
     weights = {}
+    kinds = defaultdict(set)
     for e in edges:
         if e["from"] == e["to"]:
             continue
         adj[e["from"]].add(e["to"])
         weights[(e["from"], e["to"])] = weights.get((e["from"], e["to"]), 0) + int(e.get("weight", 1))
+        kinds[(e["from"], e["to"])].update(e.get("kinds") or [])
     nodes = sorted(set(nodes) | {e["from"] for e in edges} | {e["to"] for e in edges})
     inc = defaultdict(set)
     for s, ds in adj.items():
@@ -130,9 +196,12 @@ def analyse(nodes, edges, generator, allowed_cycles, max_ce):
             "share_in_cycles": cyc_share,
             "coupling_level_hint": hint,
         },
-        "cycles": [{"members": s, "allowed": s in allowed} for s in sccs],
+        "cycles": [dict(members=s, allowed=s in allowed, cut_candidates=cut_candidates(s, weights))
+                   for s in sccs],
         "components": sorted(metrics, key=lambda x: (-(x["ca"] + x["ce"]), x["id"])),
-        "edges": [{"from": s, "to": d, "weight": w} for (s, d), w in sorted(weights.items())],
+        "edges": [dict({"from": s, "to": d, "weight": w},
+                       **({"kinds": sorted(kinds[(s, d)])} if kinds[(s, d)] else {}))
+                  for (s, d), w in sorted(weights.items())],
     }
 
 
@@ -149,6 +218,16 @@ def render_md(data, title, max_matrix=40):
         f"({int(s['share_in_cycles'] * 100)}%)",
         f"- Coupling level (heuristic): **{s['coupling_level_hint']}**", "",
     ]
+    kind_count = defaultdict(int)
+    for e in data["edges"]:
+        for k in e.get("kinds") or ["static"]:
+            kind_count[k] += 1
+    if set(kind_count) - {"static"}:
+        lines += ["- Edge kinds: " + ", ".join(f"{k} {n}" for k, n in sorted(kind_count.items())), ""]
+    for src in g.get("extra_sources", []):
+        lines += [f"> Merged {src['edges']} edge(s) from `{src['file']}` ({src.get('tool', '?')})."]
+    if g.get("extra_sources"):
+        lines += [""]
     if g.get("confidence") == "low":
         lines += ["> Edges come from static import scanning. Dependency injection, events, reflection "
                   "and shared tables are not visible, so real coupling is likely higher.", ""]
@@ -163,6 +242,10 @@ def render_md(data, title, max_matrix=40):
         for i, cyc in enumerate(data["cycles"], 1):
             mark = " (allowed by config)" if cyc["allowed"] else ""
             lines.append(f"{i}. {', '.join('`'+m+'`' for m in cyc['members'])}{mark}")
+            cuts = cyc.get("cut_candidates") or []
+            if cuts:
+                lines.append("   - cheapest cut (lightest edges that make this group acyclic): " + ", ".join(
+                    f"`{c['from']}` → `{c['to']}` (weight {c['weight']})" for c in cuts))
     ids = [c["id"] for c in sorted(data["components"], key=lambda c: c["id"])]
     if 1 < len(ids) <= max_matrix:
         w = {(e["from"], e["to"]): e["weight"] for e in data["edges"]}
@@ -238,6 +321,8 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--workspace", default="decomposition")
     ap.add_argument("--edges")
+    ap.add_argument("--extra-edges", action="append", default=[],
+                    help="additional neutral edge files to merge (database, runtime, co-change...)")
     ap.add_argument("--components")
     ap.add_argument("--domains")
     ap.add_argument("--out-dir")
@@ -256,8 +341,25 @@ def main() -> None:
         nodes = [c["id"] for c in json.loads(comp_path.read_text(encoding="utf-8"))["components"]]
 
     th = ws.thresholds()
-    generator = edges_doc.get("generator", {"tool": "external", "confidence": "unknown"})
-    data = analyse(nodes, edges_doc.get("edges", []), generator,
+    generator = dict(edges_doc.get("generator", {"tool": "external", "confidence": "unknown"}))
+    extra_paths = [Path(p) for p in args.extra_edges] + [
+        ws.dir / p for p in (ws.config.get("dependencies") or {}).get("extra_edges", [])]
+    extras = []
+    for p in dict.fromkeys(x.resolve() for x in extra_paths):
+        if not p.exists():
+            print(f"warning: extra edges file not found: {posix(p)}", file=sys.stderr)
+            continue
+        extras.append((p, json.loads(p.read_text(encoding="utf-8"))))
+    edge_list = merge_edges(edges_doc, extras) if extras else edges_doc.get("edges", [])
+    if extras:
+        generator["extra_sources"] = [
+            {"file": posix(os.path.relpath(p, ws.dir)), "tool": d.get("generator", {}).get("tool", "?"),
+             "edges": len(d.get("edges", []))} for p, d in extras]
+        unknown = sorted({x for e in edge_list for x in (e["from"], e["to"])} - set(nodes)) if nodes else []
+        if unknown:
+            print("warning: extra edges mention unknown component ids: " + ", ".join(unknown[:10]),
+                  file=sys.stderr)
+    data = analyse(nodes, edge_list, generator,
                    ws.fitness().get("allowed_cycles"), th.get("max_efferent_coupling"))
     data["internal_references"] = edges_doc.get("internal_references", {})
     out_dir = Path(args.out_dir) if args.out_dir else ws.phase_dir(4)

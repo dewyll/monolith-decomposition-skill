@@ -1,0 +1,89 @@
+{
+  "generated_at": "2026-10-31T18:30:07+00:00",
+  "source": "04-dependencies/dependencies.json",
+  "generator": {
+    "tool": "extract_dependencies.py",
+    "method": "regex-static-imports",
+    "confidence": "low",
+    "blind_spots": [
+      "dependency injection",
+      "reflection",
+      "events/messages",
+      "framework autoloading",
+      "string-based lookups",
+      "shared database tables"
+    ]
+  },
+  "edges": [
+    [
+      "shopco",
+      "shopco.orders"
+    ],
+    [
+      "shopco",
+      "shopco.reporting"
+    ],
+    [
+      "shopco.inventory",
+      "shopco.audit"
+    ],
+    [
+      "shopco.inventory",
+      "shopco.orders"
+    ],
+    [
+      "shopco.orders",
+      "shopco.audit"
+    ],
+    [
+      "shopco.orders",
+      "shopco.customers"
+    ],
+    [
+      "shopco.orders",
+      "shopco.inventory"
+    ],
+    [
+      "shopco.orders",
+      "shopco.notification"
+    ],
+    [
+      "shopco.orders",
+      "shopco.orders.pricing"
+    ],
+    [
+      "shopco.payments",
+      "shopco.audit"
+    ],
+    [
+      "shopco.payments",
+      "shopco.notification"
+    ],
+    [
+      "shopco.reporting",
+      "shopco.audit"
+    ],
+    [
+      "shopco.reporting",
+      "shopco.customers"
+    ],
+    [
+      "shopco.reporting",
+      "shopco.inventory"
+    ],
+    [
+      "shopco.reporting",
+      "shopco.orders"
+    ],
+    [
+      "shopco.reporting",
+      "shopco.payments"
+    ]
+  ],
+  "cycles": [
+    [
+      "shopco.inventory",
+      "shopco.orders"
+    ]
+  ]
+}

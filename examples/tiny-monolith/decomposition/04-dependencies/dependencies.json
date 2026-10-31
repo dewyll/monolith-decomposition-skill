@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-15T11:00:23+00:00",
+  "generated_at": "2026-10-31T18:30:34+00:00",
   "generator": {
     "tool": "extract_dependencies.py",
     "method": "regex-static-imports",
@@ -31,7 +31,14 @@
         "shopco.inventory",
         "shopco.orders"
       ],
-      "allowed": false
+      "allowed": false,
+      "cut_candidates": [
+        {
+          "from": "shopco.inventory",
+          "to": "shopco.orders",
+          "weight": 1
+        }
+      ]
     }
   ],
   "components": [
@@ -140,82 +147,130 @@
     {
       "from": "shopco",
       "to": "shopco.orders",
-      "weight": 1
+      "weight": 1,
+      "kinds": [
+        "static"
+      ]
     },
     {
       "from": "shopco",
       "to": "shopco.reporting",
-      "weight": 1
+      "weight": 1,
+      "kinds": [
+        "static"
+      ]
     },
     {
       "from": "shopco.inventory",
       "to": "shopco.audit",
-      "weight": 1
+      "weight": 1,
+      "kinds": [
+        "static"
+      ]
     },
     {
       "from": "shopco.inventory",
       "to": "shopco.orders",
-      "weight": 1
+      "weight": 1,
+      "kinds": [
+        "static"
+      ]
     },
     {
       "from": "shopco.orders",
       "to": "shopco.audit",
-      "weight": 1
+      "weight": 1,
+      "kinds": [
+        "static"
+      ]
     },
     {
       "from": "shopco.orders",
       "to": "shopco.customers",
-      "weight": 1
+      "weight": 1,
+      "kinds": [
+        "static"
+      ]
     },
     {
       "from": "shopco.orders",
       "to": "shopco.inventory",
-      "weight": 1
+      "weight": 1,
+      "kinds": [
+        "static"
+      ]
     },
     {
       "from": "shopco.orders",
       "to": "shopco.notification",
-      "weight": 1
+      "weight": 1,
+      "kinds": [
+        "static"
+      ]
     },
     {
       "from": "shopco.orders",
       "to": "shopco.orders.pricing",
-      "weight": 1
+      "weight": 1,
+      "kinds": [
+        "static"
+      ]
     },
     {
       "from": "shopco.payments",
       "to": "shopco.audit",
-      "weight": 1
+      "weight": 1,
+      "kinds": [
+        "static"
+      ]
     },
     {
       "from": "shopco.payments",
       "to": "shopco.notification",
-      "weight": 1
+      "weight": 1,
+      "kinds": [
+        "static"
+      ]
     },
     {
       "from": "shopco.reporting",
       "to": "shopco.audit",
-      "weight": 1
+      "weight": 1,
+      "kinds": [
+        "static"
+      ]
     },
     {
       "from": "shopco.reporting",
       "to": "shopco.customers",
-      "weight": 1
+      "weight": 1,
+      "kinds": [
+        "static"
+      ]
     },
     {
       "from": "shopco.reporting",
       "to": "shopco.inventory",
-      "weight": 1
+      "weight": 1,
+      "kinds": [
+        "static"
+      ]
     },
     {
       "from": "shopco.reporting",
       "to": "shopco.orders",
-      "weight": 1
+      "weight": 1,
+      "kinds": [
+        "static"
+      ]
     },
     {
       "from": "shopco.reporting",
       "to": "shopco.payments",
-      "weight": 1
+      "weight": 1,
+      "kinds": [
+        "static"
+      ]
     }
   ],
   "internal_references": {}

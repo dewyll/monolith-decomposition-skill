@@ -2,7 +2,7 @@
   "schema_version": 1,
   "created_at": "2026-10-15T11:00:13+00:00",
   "approach": "component-based",
-  "current_phase": 2,
+  "current_phase": 6,
   "phases": {
     "0": {
       "name": "Assess the monolith and choose an approach",
@@ -28,38 +28,59 @@
     },
     "2": {
       "name": "Gather common domain components",
-      "status": "in_progress",
+      "status": "approved",
       "iteration": 1,
-      "rfcs": [],
-      "updated_at": "2026-10-15T11:00:54+00:00"
+      "rfcs": [
+        "0003"
+      ],
+      "updated_at": "2026-10-31T18:29:14+00:00",
+      "approved_by": "Example reviewer",
+      "approved_at": "2026-10-31T18:29:14+00:00"
     },
     "3": {
       "name": "Flatten components",
-      "status": "not_started",
-      "iteration": 0,
-      "rfcs": [],
-      "updated_at": null
+      "status": "approved",
+      "iteration": 1,
+      "rfcs": [
+        "0004"
+      ],
+      "updated_at": "2026-10-31T18:29:39+00:00",
+      "approved_by": "Example reviewer",
+      "approved_at": "2026-10-31T18:29:39+00:00"
     },
     "4": {
       "name": "Determine component dependencies",
-      "status": "not_started",
-      "iteration": 0,
-      "rfcs": [],
-      "updated_at": null
+      "status": "approved",
+      "iteration": 1,
+      "rfcs": [
+        "0005"
+      ],
+      "updated_at": "2026-10-31T18:30:08+00:00",
+      "approved_by": "Example reviewer",
+      "approved_at": "2026-10-31T18:30:08+00:00"
     },
     "5": {
       "name": "Create component domains",
-      "status": "not_started",
-      "iteration": 0,
-      "rfcs": [],
-      "updated_at": null
+      "status": "approved",
+      "iteration": 1,
+      "rfcs": [
+        "0006"
+      ],
+      "updated_at": "2026-10-31T18:30:35+00:00",
+      "approved_by": "Example reviewer",
+      "approved_at": "2026-10-31T18:30:35+00:00"
     },
     "6": {
       "name": "Create domain services",
-      "status": "not_started",
-      "iteration": 0,
-      "rfcs": [],
-      "updated_at": null
+      "status": "approved",
+      "iteration": 1,
+      "rfcs": [
+        "0007",
+        "0008"
+      ],
+      "updated_at": "2026-10-31T18:31:10+00:00",
+      "approved_by": "Example reviewer",
+      "approved_at": "2026-10-31T18:31:10+00:00"
     }
   },
   "history": [
@@ -126,6 +147,129 @@
       "phase": 2,
       "rfcs": [],
       "by": "user",
+      "reason": ""
+    },
+    {
+      "at": "2026-10-31T18:29:13+00:00",
+      "event": "review",
+      "phase": 2,
+      "rfcs": [
+        "0003"
+      ],
+      "by": "user",
+      "reason": ""
+    },
+    {
+      "at": "2026-10-31T18:29:14+00:00",
+      "event": "approve",
+      "phase": 2,
+      "rfcs": [],
+      "by": "Example reviewer",
+      "reason": ""
+    },
+    {
+      "at": "2026-10-31T18:29:39+00:00",
+      "event": "start",
+      "phase": 3,
+      "rfcs": [],
+      "by": "user",
+      "reason": ""
+    },
+    {
+      "at": "2026-10-31T18:29:39+00:00",
+      "event": "review",
+      "phase": 3,
+      "rfcs": [
+        "0004"
+      ],
+      "by": "user",
+      "reason": ""
+    },
+    {
+      "at": "2026-10-31T18:29:39+00:00",
+      "event": "approve",
+      "phase": 3,
+      "rfcs": [],
+      "by": "Example reviewer",
+      "reason": ""
+    },
+    {
+      "at": "2026-10-31T18:30:07+00:00",
+      "event": "start",
+      "phase": 4,
+      "rfcs": [],
+      "by": "user",
+      "reason": ""
+    },
+    {
+      "at": "2026-10-31T18:30:08+00:00",
+      "event": "review",
+      "phase": 4,
+      "rfcs": [
+        "0005"
+      ],
+      "by": "user",
+      "reason": ""
+    },
+    {
+      "at": "2026-10-31T18:30:08+00:00",
+      "event": "approve",
+      "phase": 4,
+      "rfcs": [],
+      "by": "Example reviewer",
+      "reason": ""
+    },
+    {
+      "at": "2026-10-31T18:30:34+00:00",
+      "event": "start",
+      "phase": 5,
+      "rfcs": [],
+      "by": "user",
+      "reason": ""
+    },
+    {
+      "at": "2026-10-31T18:30:35+00:00",
+      "event": "review",
+      "phase": 5,
+      "rfcs": [
+        "0006"
+      ],
+      "by": "user",
+      "reason": ""
+    },
+    {
+      "at": "2026-10-31T18:30:35+00:00",
+      "event": "approve",
+      "phase": 5,
+      "rfcs": [],
+      "by": "Example reviewer",
+      "reason": ""
+    },
+    {
+      "at": "2026-10-31T18:31:10+00:00",
+      "event": "start",
+      "phase": 6,
+      "rfcs": [],
+      "by": "user",
+      "reason": ""
+    },
+    {
+      "at": "2026-10-31T18:31:10+00:00",
+      "event": "review",
+      "phase": 6,
+      "rfcs": [
+        "0007",
+        "0008"
+      ],
+      "by": "user",
+      "reason": ""
+    },
+    {
+      "at": "2026-10-31T18:31:10+00:00",
+      "event": "approve",
+      "phase": 6,
+      "rfcs": [],
+      "by": "Example reviewer",
       "reason": ""
     }
   ]

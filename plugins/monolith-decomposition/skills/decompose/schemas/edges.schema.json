@@ -42,6 +42,16 @@
           "items": {
             "type": "string"
           }
+        },
+        "kind": {
+          "type": "string",
+          "description": "Default kind for edges without 'kinds' when merged as extra edges (database, runtime, event...)"
+        },
+        "extra_sources": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
         }
       }
     },
@@ -80,7 +90,8 @@
                 "dynamic",
                 "runtime",
                 "database",
-                "event"
+                "event",
+                "co-change"
               ]
             }
           },

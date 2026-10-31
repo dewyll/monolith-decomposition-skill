@@ -19,17 +19,19 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import os
 import posixpath
 import re
 import sys
+import warnings
 from collections import defaultdict
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import (SCHEMA_VERSION, ComponentMapper, Workspace, iter_source_files,  # noqa: E402
-                    now_iso, posix, source_roots, write_json)
+from common import (SCHEMA_VERSION, ComponentMapper, Workspace, comment_style,  # noqa: E402
+                    iter_source_files, now_iso, posix, source_roots, strip_comments, write_json)
 
 # --------------------------------------------------------------------------
 # Import patterns. Each returns (kind, target) where kind is
@@ -38,8 +40,9 @@ from common import (SCHEMA_VERSION, ComponentMapper, Workspace, iter_source_file
 #   "dyn"  a dynamic import             (import('./x'))
 # --------------------------------------------------------------------------
 RX = {
-    "py_import": re.compile(r"^[ \t]*import[ \t]+([\w\. \t,]+?)[ \t]*$", re.M),
-    "py_from": re.compile(r"^[ \t]*from[ \t]+(\.*[\w\.]*)[ \t]+import[ \t]+\(?[ \t]*([\w \t,\.\*]+)", re.M),
+    # Python fallback only (when ast cannot parse the file, e.g. Python 2 code)
+    "py_import": re.compile(r"^[ \t]*import[ \t]+([\w\. \t,]+)", re.M),
+    "py_from": re.compile(r"^[ \t]*from[ \t]+(\.*[\w\.]*)[ \t]+import[ \t]+(?:\(([^)]*)\)|([^\n;]+))", re.M),
     "js_from": re.compile(r"""(?:import|export)\s[^'"`;]*?\sfrom\s*['"]([^'"]+)['"]""", re.S),
     "js_side": re.compile(r"""^\s*import\s*['"]([^'"]+)['"]""", re.M),
     "js_require": re.compile(r"""require\s*\(\s*['"]([^'"]+)['"]\s*\)"""),
@@ -59,29 +62,65 @@ RX = {
 }
 
 
+def _py_from(mod: str, names, out):
+    names = [n for n in names if n and n != "*"]
+    if mod.startswith("."):
+        # relative: "from . import sub" -> sub may be a sub-package, so try both
+        out.append(("pyrel", mod))
+        for n in names:
+            out.append(("pyrel", mod + ("" if mod.endswith(".") else ".") + n))
+    else:
+        out.append(("ns", mod))
+        for n in names:
+            out.append(("ns", f"{mod}.{n}"))
+
+
+def python_imports_ast(text: str):
+    """Exact Python imports via the standard library parser.
+
+    Handles parenthesised multi-line imports, trailing comments, imports
+    inside functions or `if TYPE_CHECKING:` blocks, and ignores docstrings.
+    Returns None when the file does not parse with this interpreter.
+    """
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")  # e.g. invalid escape sequences in old code
+            tree = ast.parse(text)
+    except (SyntaxError, ValueError):
+        return None
+    out = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            out += [("ns", a.name) for a in node.names]
+        elif isinstance(node, ast.ImportFrom):
+            _py_from("." * (node.level or 0) + (node.module or ""), [a.name for a in node.names], out)
+    return out
+
+
+def python_imports_regex(text: str):
+    """Fallback for files ast cannot parse; expects comments and strings already blanked."""
+    out = []
+    for m in RX["py_import"].finditer(text):
+        for name in m.group(1).split(","):
+            name = name.strip().split(" as ")[0].strip()
+            if name:
+                out.append(("ns", name))
+    for m in RX["py_from"].finditer(text):
+        body = m.group(2) if m.group(2) is not None else m.group(3)
+        names = [n.strip().split(" as ")[0].strip() for n in body.replace("\\\n", " ").split(",")]
+        _py_from(m.group(1), names, out)
+    return out
+
+
 def imports_for(language: str, text: str):
     out = []
     if language == "python":
-        for m in RX["py_import"].finditer(text):
-            for name in m.group(1).split(","):
-                name = name.strip().split(" as ")[0].strip()
-                if name:
-                    out.append(("ns", name))
-        for m in RX["py_from"].finditer(text):
-            mod = m.group(1)
-            names = [n.strip().split(" as ")[0] for n in m.group(2).split(",") if n.strip()]
-            if mod.startswith("."):
-                # relative: also try "from . import sub" -> sub may be a sub-package
-                out.append(("pyrel", mod))
-                for n in names:
-                    if n != "*":
-                        out.append(("pyrel", mod + ("" if mod.endswith(".") else ".") + n))
-            else:
-                out.append(("ns", mod))
-                for n in names:
-                    if n != "*":
-                        out.append(("ns", f"{mod}.{n}"))
-    elif language in ("typescript", "javascript"):
+        parsed = python_imports_ast(text)
+        if parsed is not None:
+            return parsed
+        return python_imports_regex(strip_comments(text, comment_style("python"), blank_strings=True))
+    text = strip_comments(text, "php" if language == "php" else comment_style(language))
+    if language in ("typescript", "javascript"):
         for key in ("js_from", "js_side", "js_require"):
             out += [("path", m.group(1)) for m in RX[key].finditer(text)]
         out += [("dyn", m.group(1)) for m in RX["js_dynamic"].finditer(text)]
@@ -103,8 +142,7 @@ def imports_for(language: str, text: str):
     elif language == "elixir":
         out += [("ns", m.group(1)) for m in RX["ex_ref"].finditer(text)]
     elif language in ("c", "cpp", "objc"):
-        out += [("path", "./" + m.group(1)) for m in RX["c_include"].finditer(text)]
-        out += [("rootpath", m.group(1)) for m in RX["c_include"].finditer(text)]
+        out += [("include", m.group(1)) for m in RX["c_include"].finditer(text)]
     elif language == "swift":
         out += [("ns", m.group(1)) for m in RX["swift_import"].finditer(text)]
     return out
@@ -158,6 +196,13 @@ class Resolver:
                 return self.ns[k]
         return None
 
+    def _exists(self, rel: str) -> bool:
+        """True when rel (relative to the project root, extension optional) is a real file or folder."""
+        full = self.ws.project_root / posixpath.normpath(rel)
+        if full.exists():
+            return True
+        return full.parent.exists() and any(full.parent.glob(full.name + ".*"))
+
     def resolve(self, kind: str, target: str, from_file: str):
         here = posixpath.dirname(from_file)
         if kind in ("path", "dyn"):
@@ -168,13 +213,16 @@ class Resolver:
                     return self.by_path(posixpath.normpath(repl.rstrip("/") + "/" +
                                                            target[len(prefix):].lstrip("/")))
             return None  # bare specifier: external package
+        if kind == "include":
+            # #include "x.h": relative to the including file first, then the source roots
+            return (self.by_path(posixpath.join(here, target)) if self._exists(posixpath.join(here, target))
+                    else None) or self.resolve("rootpath", target, from_file)
         if kind == "rootpath":
             # only count it when the file really exists under a source root,
             # otherwise `require "json"` would look like an internal import
             for r in self.roots:
                 cand = posixpath.normpath(("" if r["path"] == "." else r["path"] + "/") + target)
-                full = self.ws.project_root / cand
-                if full.exists() or any(full.parent.glob(full.name + ".*")) if full.parent.exists() else False:
+                if self._exists(cand):
                     return self.by_path(cand)
             return None
         if kind == "pyrel":
