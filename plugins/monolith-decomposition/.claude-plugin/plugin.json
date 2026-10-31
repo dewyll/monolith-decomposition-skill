@@ -1,6 +1,6 @@
 {
   "name": "monolith-decomposition",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Phased, evidence-based monolith to microservices decomposition for any language: component sizing, dependency analysis, domain and service mapping, architecture RFCs and fitness functions.",
   "author": {
     "name": "Denys Wylliam",

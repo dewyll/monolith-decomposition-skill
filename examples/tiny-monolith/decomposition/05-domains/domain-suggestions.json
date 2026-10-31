@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-31T18:30:34+00:00",
+  "generator": {
+    "tool": "suggest_domains.py",
+    "method": "louvain",
+    "resolution": 1.0,
+    "signals": {
+      "imports": true,
+      "co_change": false
+    },
+    "change_weight": 0.0
+  },
+  "modularity": 0.1,
+  "shared": [
+    "shopco.audit",
+    "shopco.notification",
+    "shopco.orders.notification"
+  ],
+  "suggestions": [
+    {
+      "id": "reporting",
+      "components": [
+        "shopco",
+        "shopco.customers",
+        "shopco.payments",
+        "shopco.reporting"
+      ],
+      "size_percent": 36.77,
+      "cohesion": 0.43,
+      "isolated": false
+    },
+    {
+      "id": "orders",
+      "components": [
+        "shopco.inventory",
+        "shopco.orders",
+        "shopco.orders.pricing"
+      ],
+      "size_percent": 48.28,
+      "cohesion": 0.43,
+      "isolated": false
+    }
+  ]
+}

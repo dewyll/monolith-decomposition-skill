@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-31T18:30:34+00:00",
+  "generator": {
+    "tool": "extract_dependencies.py",
+    "method": "regex-static-imports",
+    "confidence": "low",
+    "blind_spots": [
+      "dependency injection",
+      "reflection",
+      "events/messages",
+      "framework autoloading",
+      "string-based lookups",
+      "shared database tables"
+    ]
+  },
+  "summary": {
+    "components": 6,
+    "edges": 9,
+    "density": 0.3,
+    "mean_ce": 1.5,
+    "stddev_ce": 1.38,
+    "cycles": 0,
+    "components_in_cycles": 0,
+    "share_in_cycles": 0.0,
+    "coupling_level_hint": "high"
+  },
+  "cycles": [],
+  "components": [
+    {
+      "id": "reporting",
+      "ca": 1,
+      "ce": 4,
+      "instability": 0.8,
+      "weighted_in": 1,
+      "weighted_out": 5,
+      "in_cycle": false,
+      "over_max_ce": false
+    },
+    {
+      "id": "ordering",
+      "ca": 2,
+      "ce": 2,
+      "instability": 0.5,
+      "weighted_in": 3,
+      "weighted_out": 4,
+      "in_cycle": false,
+      "over_max_ce": false
+    },
+    {
+      "id": "platform",
+      "ca": 3,
+      "ce": 0,
+      "instability": 0.0,
+      "weighted_in": 6,
+      "weighted_out": 0,
+      "in_cycle": false,
+      "over_max_ce": false
+    },
+    {
+      "id": "customer",
+      "ca": 2,
+      "ce": 0,
+      "instability": 0.0,
+      "weighted_in": 2,
+      "weighted_out": 0,
+      "in_cycle": false,
+      "over_max_ce": false
+    },
+    {
+      "id": "payment",
+      "ca": 1,
+      "ce": 1,
+      "instability": 0.5,
+      "weighted_in": 1,
+      "weighted_out": 2,
+      "in_cycle": false,
+      "over_max_ce": false
+    },
+    {
+      "id": "shell",
+      "ca": 0,
+      "ce": 2,
+      "instability": 1.0,
+      "weighted_in": 0,
+      "weighted_out": 2,
+      "in_cycle": false,
+      "over_max_ce": false
+    }
+  ],
+  "edges": [
+    {
+      "from": "ordering",
+      "to": "customer",
+      "weight": 1
+    },
+    {
+      "from": "ordering",
+      "to": "platform",
+      "weight": 3
+    },
+    {
+      "from": "payment",
+      "to": "platform",
+      "weight": 2
+    },
+    {
+      "from": "reporting",
+      "to": "customer",
+      "weight": 1
+    },
+    {
+      "from": "reporting",
+      "to": "ordering",
+      "weight": 2
+    },
+    {
+      "from": "reporting",
+      "to": "payment",
+      "weight": 1
+    },
+    {
+      "from": "reporting",
+      "to": "platform",
+      "weight": 1
+    },
+    {
+      "from": "shell",
+      "to": "ordering",
+      "weight": 1
+    },
+    {
+      "from": "shell",
+      "to": "reporting",
+      "weight": 1
+    }
+  ],
+  "cohesion": {
+    "ordering": 0.43,
+    "customer": null,
+    "payment": 0.0,
+    "reporting": 0.0,
+    "platform": null,
+    "shell": 0.0
+  },
+  "intra_domain_references": {
+    "ordering": 3,
+    "customer": 0,
+    "payment": 0,
+    "reporting": 0,
+    "platform": 0,
+    "shell": 0
+  },
+  "unmapped_components": []
+}

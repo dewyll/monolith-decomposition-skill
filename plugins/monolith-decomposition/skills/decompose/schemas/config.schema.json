@@ -224,6 +224,19 @@
           "type": "string"
         }
       }
+    },
+    "dependencies": {
+      "type": "object",
+      "description": "Extra inputs for analyze_dependencies.py.",
+      "properties": {
+        "extra_edges": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Neutral edge files (relative to the workspace) merged into every analysis, e.g. 04-dependencies/data-edges.json"
+        }
+      }
     }
   }
 }

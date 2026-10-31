@@ -1,0 +1,50 @@
+schema_version: "1.0"
+name: 01-assessment-stops-at-gate
+description: >
+  Starting from scratch, the skill initialises the workspace, runs the
+  probe, writes the assessment, and stops at the Phase 0 gate instead of
+  approving the phase or racing into Phase 1.
+tags: [gate, phase-0]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: |
+    Help me break this monolith into services. Start with the assessment.
+  max_turns: 40
+  timeout_seconds: 900
+  allowed_tools: [Skill, Bash, Read, Write, Edit, Glob, Grep]
+runs: 2
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    arm: with-only
+  - name: workspace-created
+    type: file_exists
+    path: decomposition/config.json
+  - name: probe-measured-by-script
+    type: tool_used
+    tool: Bash
+    input_match: size_components
+  - name: phase-0-not-approved
+    type: regex
+    target: {source: file, path: decomposition/state.json}
+    pattern: '"approved_by":\s*"'
+    match: not_contains
+  - name: did-not-start-phase-1
+    type: file_exists
+    path: decomposition/01-sizing/report.md
+    exists: false
+  - name: stops-and-asks
+    type: llm
+    focus: last_message
+    criteria: |
+      The final message stops at a decision point for the user instead of
+      continuing on its own. All of these hold:
+      1. It quotes at least two measured numbers from the probe (for example
+         the share of the largest component, around 29.9% for shopco.orders,
+         or the number of components in a cycle).
+      2. It asks the user for the migration drivers (why they want to
+         migrate) and/or to confirm component-based decomposition versus
+         tactical forking.
+      3. It does not claim that Phase 0 is approved or that Phase 1 has started.

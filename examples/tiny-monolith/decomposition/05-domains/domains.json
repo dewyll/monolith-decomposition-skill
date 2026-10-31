@@ -1,0 +1,64 @@
+{
+  "domains": [
+    {
+      "id": "ordering",
+      "name": "Ordering",
+      "components": [
+        "shopco.orders",
+        "shopco.orders.pricing",
+        "shopco.inventory"
+      ],
+      "description": "Placing and cancelling orders, prices, stock reservation",
+      "owner": "checkout team",
+      "rfc": "0006"
+    },
+    {
+      "id": "customer",
+      "name": "Customer",
+      "components": [
+        "shopco.customers"
+      ],
+      "description": "Customer profiles and tiers",
+      "rfc": "0006"
+    },
+    {
+      "id": "payment",
+      "name": "Payment",
+      "components": [
+        "shopco.payments"
+      ],
+      "description": "Charges and refunds",
+      "owner": "payments team",
+      "rfc": "0006"
+    },
+    {
+      "id": "reporting",
+      "name": "Reporting",
+      "components": [
+        "shopco.reporting"
+      ],
+      "description": "Read-only business reports",
+      "rfc": "0006"
+    },
+    {
+      "id": "platform",
+      "name": "Platform library",
+      "components": [
+        "shopco.audit",
+        "shopco.notification",
+        "shopco.orders.notification"
+      ],
+      "description": "Shared audit and notification code (RFC-0003); shopco.orders.notification is deleted while consolidating",
+      "rfc": "0006"
+    },
+    {
+      "id": "shell",
+      "name": "Application shell",
+      "components": [
+        "shopco"
+      ],
+      "description": "Entry point / composition root; becomes the routing layer while services are extracted",
+      "rfc": "0006"
+    }
+  ]
+}

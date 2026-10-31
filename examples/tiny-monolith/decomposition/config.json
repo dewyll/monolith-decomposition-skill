@@ -91,10 +91,46 @@
     "reporting"
   ],
   "fitness": {
-    "size_allowlist": {},
-    "orphan_allowlist": {},
+    "size_allowlist": {
+      "shopco.orders": "RFC-0002: split by the Phase 3 push-down (RFC-0004); remove this entry when it lands"
+    },
+    "orphan_allowlist": {
+      "shopco": "RFC-0004: entry point and composition root, stays in the root on purpose",
+      "shopco.orders": "RFC-0004: push-down to shopco.orders.core scheduled with the ordering-service extraction; remove when done"
+    },
     "allowed_cycles": [],
-    "forbidden_dependencies": []
+    "forbidden_dependencies": [
+      {
+        "from": "platform",
+        "to": "*",
+        "level": "domain",
+        "rfc": "0006"
+      },
+      {
+        "from": "customer",
+        "to": "*",
+        "level": "domain",
+        "rfc": "0006"
+      },
+      {
+        "from": "ordering",
+        "to": "reporting",
+        "level": "domain",
+        "rfc": "0006"
+      },
+      {
+        "from": "payment",
+        "to": "reporting",
+        "level": "domain",
+        "rfc": "0006"
+      },
+      {
+        "from": "payment",
+        "to": "ordering",
+        "level": "domain",
+        "rfc": "0006"
+      }
+    ]
   },
   "workspace": {
     "rfc_dir": "rfcs"

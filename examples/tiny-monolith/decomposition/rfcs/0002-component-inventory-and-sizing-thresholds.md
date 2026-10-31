@@ -40,14 +40,16 @@ sub-components with code of their own. Tests are excluded from sizing.
 
 We will keep the default thresholds (|z| > 1, max 15%) and the directory
 mapping with no depth limit. `shopco.orders` will be split in Phase 3 by
-pushing `service.py` down into `shopco.orders.core`; it is not allow-listed,
-so F1.2 keeps failing until that happens. The entry point `shopco` (root)
-is allow-listed for F3.1 in Phase 3.
+pushing `service.py` down into `shopco.orders.core`. Until that lands it is
+in `fitness.size_allowlist` with a pointer to this RFC, so the guard stays
+green for everything else; the entry is removed when the push-down is done.
+The entry point `shopco` (root) is allow-listed for F3.1 in Phase 3.
 
 ## Trade-offs and consequences
 
 - Positive: size drift is visible on every run.
-- Negative: F1.2 stays red until Phase 3 lands.
+- Negative: an allow-list entry can outlive its reason; it names the RFC
+  and the condition for removing it, and the Phase 3 gate checks it.
 
 ## Fitness functions
 

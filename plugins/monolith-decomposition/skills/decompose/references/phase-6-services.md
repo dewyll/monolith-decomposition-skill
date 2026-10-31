@@ -49,7 +49,7 @@ Propose an order and justify it with the numbers:
 
 ```bash
 python3 "$SKILL_DIR/scripts/check_fitness.py" --workspace decomposition --phase 6
-python3 "$SKILL_DIR/scripts/check_fitness.py" --workspace decomposition --phase guard
+python3 "$SKILL_DIR/scripts/run_guard.py" --workspace decomposition   # what CI will run
 ```
 
 ## Decisions and RFCs

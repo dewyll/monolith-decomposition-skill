@@ -14,6 +14,7 @@ references/fitness-functions.md for wiring it into a pipeline).
   F4.1  no dependency cycles except fitness.allowed_cycles      (fail)
   F4.2  efferent coupling <= thresholds.max_efferent_coupling   (fail)
   F4.3  dependency data has better than "low" confidence        (warn)
+  F4.4  no new component dependency compared with the baseline  (fail)
   F5.1  every component belongs to exactly one domain           (fail)
   F5.2  domains only reference known components                 (fail)
   F5.3  domain cohesion >= thresholds.min_domain_cohesion       (warn)
@@ -21,14 +22,27 @@ references/fitness-functions.md for wiring it into a pipeline).
   F6.1  every domain belongs to exactly one service             (fail)
   F6.2  cross-service dependencies are declared as interfaces   (fail)
 
+Baseline (ratchet). A real monolith starts with cycles and tangled edges,
+so absolute rules would make the guard red on day one. Record the current
+state once and the guard only fails on things that get *worse*:
+
+  python3 check_fitness.py --workspace decomposition --update-baseline
+
+writes fitness/baseline.json (component edges and cycles). From then on a
+cycle contained in a baselined cycle is a warning instead of a failure, and
+F4.4 fails on any new component-to-component dependency. Edges that
+disappear are reported so you can tighten the baseline again.
+
 Usage:
-  python3 check_fitness.py --workspace decomposition --phase 1|2|3|4|5|6|all|guard [--strict]
+  python3 check_fitness.py --workspace decomposition --phase 1|2|3|4|5|6|all|guard
+                           [--strict] [--baseline PATH] [--no-baseline] [--update-baseline]
 Exit code 1 when any check fails.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from collections import Counter
 from pathlib import Path
@@ -40,9 +54,10 @@ PASS, FAIL, WARN, SKIP = "PASS", "FAIL", "WARN", "SKIP"
 
 
 class Checker:
-    def __init__(self, ws: Workspace):
+    def __init__(self, ws: Workspace, baseline=None):
         self.ws = ws
         self.results = []
+        self.baseline = baseline
 
     def add(self, cid, status, message, details=None):
         self.results.append({"id": cid, "status": status, "message": message, "details": details or []})
@@ -110,9 +125,18 @@ class Checker:
                 self.add(c, SKIP, "dependencies.json not found")
             return
         cyc = [c["members"] for c in deps["cycles"] if not c["allowed"]]
-        self.add("F4.1", FAIL if cyc else PASS,
-                 f"{len(cyc)} dependency cycle(s)" if cyc else "no dependency cycles",
-                 [" <-> ".join(c) for c in cyc])
+        base_cycles = [set(c) for c in (self.baseline or {}).get("cycles", [])]
+        frozen = [c for c in cyc if any(set(c) <= b for b in base_cycles)]
+        new = [c for c in cyc if c not in frozen]
+        if new:
+            self.add("F4.1", FAIL, f"{len(new)} dependency cycle(s) not in the baseline" if self.baseline
+                     else f"{len(new)} dependency cycle(s)",
+                     [" <-> ".join(c) for c in new] + [f"(baselined) {' <-> '.join(c)}" for c in frozen])
+        elif frozen:
+            self.add("F4.1", WARN, f"{len(frozen)} cycle(s) remain, all frozen in the baseline",
+                     [" <-> ".join(c) for c in frozen])
+        else:
+            self.add("F4.1", PASS, "no dependency cycles")
         max_ce = self.ws.thresholds().get("max_efferent_coupling")
         if max_ce is None:
             self.add("F4.2", SKIP, "thresholds.max_efferent_coupling not set")
@@ -124,6 +148,18 @@ class Checker:
         conf = deps.get("generator", {}).get("confidence", "unknown")
         self.add("F4.3", WARN if conf in ("low", "unknown") else PASS,
                  f"dependency data confidence: {conf}")
+        if not self.baseline:
+            self.add("F4.4", SKIP, "no baseline (check_fitness.py --update-baseline records one)")
+        else:
+            now = {(e["from"], e["to"]) for e in deps["edges"]}
+            base = {tuple(e) for e in self.baseline.get("edges", [])}
+            added, removed = sorted(now - base), sorted(base - now)
+            note = ([f"{len(removed)} baselined edge(s) gone: run --update-baseline to lock in the progress"]
+                    if removed else [])
+            self.add("F4.4", FAIL if added else PASS,
+                     f"{len(added)} new component dependency(ies) since the baseline" if added
+                     else "no new component dependencies since the baseline",
+                     [f"{a} -> {b}" for a, b in added] + note)
 
     # ---------------------------------------------------------------- phase 5
     def phase5(self):
@@ -203,15 +239,43 @@ class Checker:
                  [f"{a} -> {b}" for a, b in undeclared])
 
 
+def update_baseline(ws: Workspace, path: Path) -> None:
+    dep_path = ws.artifact(4, "dependencies.json")
+    if not dep_path.exists():
+        sys.exit("error: no 04-dependencies/dependencies.json; run analyze_dependencies.py first")
+    deps = json.loads(dep_path.read_text(encoding="utf-8"))
+    data = {
+        "generated_at": now_iso(),
+        "source": posix(os.path.relpath(dep_path, ws.dir)),
+        "generator": deps.get("generator", {}),
+        "edges": sorted([e["from"], e["to"]] for e in deps["edges"]),
+        "cycles": sorted(c["members"] for c in deps["cycles"]),
+    }
+    write_json(path, data)
+    print(json.dumps({"written": posix(path), "edges": len(data["edges"]),
+                      "cycles": len(data["cycles"])}, indent=2))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--workspace", default="decomposition")
     ap.add_argument("--phase", default="all")
     ap.add_argument("--strict", action="store_true", help="treat warnings as failures")
+    ap.add_argument("--baseline", help="baseline file (default: fitness/baseline.json)")
+    ap.add_argument("--no-baseline", action="store_true", help="ignore the baseline: absolute checks only")
+    ap.add_argument("--update-baseline", action="store_true",
+                    help="record the current edges and cycles as the baseline, then exit")
     args = ap.parse_args()
 
     ws = Workspace(args.workspace)
-    ch = Checker(ws)
+    base_path = Path(args.baseline) if args.baseline else ws.fitness_dir / "baseline.json"
+    if args.update_baseline:
+        update_baseline(ws, base_path)
+        return
+    baseline = None
+    if not args.no_baseline and base_path.exists():
+        baseline = json.loads(base_path.read_text(encoding="utf-8"))
+    ch = Checker(ws, baseline)
     plan = {
         "1": [ch.phase1], "2": [ch.phase2], "3": [ch.phase3], "4": [ch.phase4],
         "5": [ch.phase5], "6": [ch.phase6],
@@ -230,6 +294,7 @@ def main() -> None:
                 r["status"] = FAIL
     failed = [r for r in ch.results if r["status"] == FAIL]
     out = {"generated_at": now_iso(), "phase": args.phase, "strict": args.strict,
+           "baseline": posix(os.path.relpath(base_path.resolve(), ws.dir)) if baseline else None,
            "passed": not failed, "results": ch.results}
     dest = ws.fitness_dir / f"results-{args.phase}.json"
     write_json(dest, out)

@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-10-31T18:29:39+00:00",
+  "phase": "3",
+  "strict": false,
+  "baseline": null,
+  "passed": true,
+  "results": [
+    {
+      "id": "F3.1",
+      "status": "PASS",
+      "message": "no orphaned files in root namespaces",
+      "details": []
+    }
+  ]
+}

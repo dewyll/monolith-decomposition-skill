@@ -6,14 +6,16 @@
 decomposition/
 ├── config.json              mapping, thresholds, fitness rules
 ├── state.json               phase state machine and history
-├── 00-assessment/           assessment.md, probe/, fork-plan.md (tactical forking)
+├── 00-assessment/           assessment.md, probe/ (incl. change-coupling), fork-plan.md (tactical forking)
 ├── 01-sizing/               components.json, components.md, report.md
 ├── 02-common-domain/        candidates.json/.md, common-domain.json, report.md
 ├── 03-flattening/           plan.md, plan.json, components.json/.md (re-measured), report.md
-├── 04-dependencies/         edges.json, dependencies.json/.md/.mmd, report.md
-├── 05-domains/              domains.json, domain-coupling.json/.md/.mmd, report.md
+├── 04-dependencies/         edges.json, dependencies.json/.md/.mmd, change-coupling.json/.md,
+│                            data-coupling.json/.md, data-edges.json, report.md
+├── 05-domains/              domain-suggestions.json/.md, domains.draft.json, domains.json,
+│                            domain-coupling.json/.md/.mmd, report.md
 ├── 06-services/             services.json, report.md
-├── fitness/                 results-<phase>.json/.md, native rule snippets
+├── fitness/                 results-<phase>.json/.md, baseline.json, native rule snippets
 └── rfcs/                    0001-*.md … and index.md
 ```
 
@@ -31,6 +33,7 @@ knows how much to trust it.
 | `include` / `exclude` | Globs relative to the project root (`**` crosses folders, `*` does not). |
 | `extensions` | Restrict to these file extensions; empty means all known source types. |
 | `import_aliases` | Path aliases for path-style imports, e.g. `{"@/": "src/"}` (TS paths, webpack aliases). |
+| `dependencies.extra_edges` | Neutral edge files (relative to the workspace) merged into every `analyze_dependencies.py` run, e.g. `["04-dependencies/data-edges.json"]`. |
 | `components.strategy` | `directory` (each folder with code is a component) or `explicit`. |
 | `components.max_depth` | Collapse folders deeper than this below the source root. |
 | `components.separator` | Separator in component ids (default `.`). |
@@ -44,7 +47,7 @@ knows how much to trust it.
 | `common_keywords` | Words that suggest shared concerns. |
 | `fitness.size_allowlist` | `{component: "reason (RFC-nnnn)"}` exempt from F1.2/F1.3. |
 | `fitness.orphan_allowlist` | `{component: "reason"}` exempt from F3.1. |
-| `fitness.allowed_cycles` | `[[a, b], ...]` cycles accepted by an RFC. |
+| `fitness.allowed_cycles` | `[[a, b], ...]` cycles accepted by an RFC (permanently; for "until we fix it", prefer the baseline). |
 | `fitness.forbidden_dependencies` | `[{from, to, level: domain or component, rfc}]`; `*` is a wildcard. |
 | `workspace.rfc_dir` | Where RFCs live, relative to the workspace (default `rfcs`). |
 
@@ -59,6 +62,19 @@ not_started → in_progress → awaiting_review → approved
 Fields per phase: `status`, `iteration`, `rfcs`, `updated_at`,
 `approved_by`, `approved_at`. `history` keeps every transition. Use
 `state.py`; edit by hand only to repair a broken file.
+
+`state.py` guards the transitions: `start` needs the previous phase
+approved (and refuses phases 1–6 under tactical forking), `review` needs the
+phase in progress, and `approve` needs every attached RFC to be Accepted
+and, for phases 1–6, a passing `fitness/results-N.json` newer than the
+phase start. `--force --reason "..."` overrides and records
+`"forced": true` in the history.
+
+## fitness/baseline.json
+
+Written by `check_fitness.py --update-baseline`: `edges` (`[from, to]`
+pairs) and `cycles` (member lists) at that moment. See
+`fitness-functions.md` for how the ratchet uses it.
 
 ## Neutral formats for external tools
 

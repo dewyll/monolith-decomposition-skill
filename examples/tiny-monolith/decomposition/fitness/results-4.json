@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-10-31T18:30:07+00:00",
+  "phase": "4",
+  "strict": false,
+  "baseline": "fitness/baseline.json",
+  "passed": true,
+  "results": [
+    {
+      "id": "F4.1",
+      "status": "WARN",
+      "message": "1 cycle(s) remain, all frozen in the baseline",
+      "details": [
+        "shopco.inventory <-> shopco.orders"
+      ]
+    },
+    {
+      "id": "F4.2",
+      "status": "SKIP",
+      "message": "thresholds.max_efferent_coupling not set",
+      "details": []
+    },
+    {
+      "id": "F4.3",
+      "status": "WARN",
+      "message": "dependency data confidence: low",
+      "details": []
+    },
+    {
+      "id": "F4.4",
+      "status": "PASS",
+      "message": "no new component dependencies since the baseline",
+      "details": []
+    }
+  ]
+}

@@ -1,8 +1,9 @@
 {
-  "generated_at": "2026-10-15T11:00:55+00:00",
+  "generated_at": "2026-10-31T18:28:45+00:00",
   "phase": "1",
   "strict": false,
-  "passed": false,
+  "baseline": null,
+  "passed": true,
   "results": [
     {
       "id": "F1.1",
@@ -12,19 +13,15 @@
     },
     {
       "id": "F1.2",
-      "status": "FAIL",
-      "message": "1 component(s) above the max share",
-      "details": [
-        "shopco.orders: 29.89%"
-      ]
+      "status": "PASS",
+      "message": "no component above the max share",
+      "details": []
     },
     {
       "id": "F1.3",
-      "status": "WARN",
-      "message": "1 size outlier(s) without justification",
-      "details": [
-        "shopco.orders: z=2.74"
-      ]
+      "status": "PASS",
+      "message": "every size outlier is justified",
+      "details": []
     }
   ]
 }

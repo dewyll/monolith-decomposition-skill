@@ -1,0 +1,43 @@
+schema_version: "1.0"
+name: 03-resume-workspace
+description: >
+  With an existing workspace where every phase is approved, the agent
+  reads the state with state.py, summarises briefly and does not redo work.
+tags: [resume]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: |
+    Resume the decomposition and show me where we are.
+  max_turns: 20
+  timeout_seconds: 400
+  allowed_tools: [Skill, Bash, Read, Glob, Grep]
+runs: 2
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    arm: with-only
+  - name: read-state-with-script
+    type: tool_used
+    tool: Bash
+    input_match: state.py
+  - name: did-not-reinitialise
+    type: tool_used
+    tool: Bash
+    input_match: init_workspace
+    min: 0
+    max: 0
+    arm: both
+  - name: short-accurate-summary
+    type: llm
+    focus: last_message
+    criteria: |
+      1. It says that all phases (0 to 6) are approved / the phased
+         decomposition is complete.
+      2. It points to the next concrete step: extracting payment-service
+         first, per the extraction order RFC.
+      3. It mentions at least one pending item carried by the workspace:
+         the frozen orders-inventory cycle, the orders push-down, or the
+         allow-list entries.
+      4. It is a summary of a few lines, not a re-run of earlier phases.

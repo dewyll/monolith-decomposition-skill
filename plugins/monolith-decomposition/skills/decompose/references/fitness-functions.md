@@ -24,9 +24,10 @@ Use both. Generic checks prove the process; native rules keep it alive.
 | F1.3 | 1 | size outliers are justified | `thresholds.size_outlier_stddev`, `fitness.size_allowlist` |
 | F2.1 | 2 | every common-domain candidate has a decision | `02-common-domain/common-domain.json` |
 | F3.1 | 3 | no orphaned code in parent namespaces | `fitness.orphan_allowlist` |
-| F4.1 | 4 | no dependency cycles | `fitness.allowed_cycles` |
+| F4.1 | 4 | no dependency cycles | `fitness.allowed_cycles`, baseline |
 | F4.2 | 4 | efferent coupling cap | `thresholds.max_efferent_coupling` |
 | F4.3 | 4 | dependency data is better than low confidence | (native extractor) |
+| F4.4 | 4 | no new component dependency since the baseline | `fitness/baseline.json` |
 | F5.1–F5.2 | 5 | every component in exactly one domain | `05-domains/domains.json` |
 | F5.3 | 5 | domain cohesion floor | `thresholds.min_domain_cohesion` |
 | F5.4 | 5 | forbidden dependencies absent | `fitness.forbidden_dependencies` |
@@ -35,18 +36,44 @@ Use both. Generic checks prove the process; native rules keep it alive.
 `--phase guard` runs the subset that should keep running after the gates
 (1, 3, 4, 5, 6). `--strict` turns warnings into failures.
 
+## The baseline: a ratchet, not a wall
+
+A real monolith starts with cycles and tangled edges. Absolute rules make
+the guard red on day one, and a guard that is always red gets switched
+off. Record the current state once the Phase 4 RFC is agreed:
+
+```bash
+python3 $SKILL/scripts/check_fitness.py --workspace decomposition --update-baseline
+```
+
+`fitness/baseline.json` holds the component edges and cycles of that
+moment. From then on:
+
+- a cycle whose members all sit inside a baselined cycle is a **warning**;
+  a new cycle, or a baselined one that grew, **fails** F4.1;
+- any component dependency not in the baseline **fails** F4.4;
+- edges that disappeared are reported; run `--update-baseline` again to
+  lock the improvement in, so it cannot quietly come back.
+
+Commit the baseline and review changes to it like code: a pull request
+that updates it is accepting new coupling. `--no-baseline` shows the
+absolute picture.
+
 ## Wiring the guard into CI
 
-Commit the `decomposition/` workspace, then run in the pipeline:
+Checking the committed artifacts proves nothing about the code in a pull
+request, so the guard must re-measure first. `run_guard.py` does it in one
+command: sizing (into `03-flattening/` when that phase produced an
+inventory), dependency extraction, analysis (with `dependencies.extra_edges`
+and the domain map when present), then `check_fitness.py --phase guard`.
 
 ```bash
 SKILL=path/to/skills/decompose      # vendored copy or a git submodule
-python3 $SKILL/scripts/size_components.py      --workspace decomposition --out-dir 03-flattening
-python3 $SKILL/scripts/extract_dependencies.py --workspace decomposition
-python3 $SKILL/scripts/analyze_dependencies.py --workspace decomposition \
-        --domains decomposition/05-domains/domains.json
-python3 $SKILL/scripts/check_fitness.py        --workspace decomposition --phase guard
+python3 $SKILL/scripts/run_guard.py --workspace decomposition
 ```
+
+When a native extractor produces the edges, run it and its converter
+first, then `run_guard.py --skip-extract`.
 
 GitHub Actions example:
 
@@ -57,14 +84,15 @@ jobs:
   fitness:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
-      - run: ./scripts/architecture-fitness.sh   # the commands above
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: "3.13" }
+      - run: python3 tools/decompose/scripts/run_guard.py --workspace decomposition
 ```
 
-When a native extractor is used for edges, run it (and its converter)
-instead of `extract_dependencies.py`.
+(Keep the action versions in step with your other workflows.)
+`run_guard.py` rewrites the artifacts in the workspace, which is what CI
+needs; on a laptop, review or discard that diff afterwards.
 
 ## Choosing a native library
 

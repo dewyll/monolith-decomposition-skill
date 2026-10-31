@@ -1,0 +1,37 @@
+{
+  "decisions": [
+    {
+      "component": "shopco.notification",
+      "decision": "consolidate",
+      "target": "shopco.notification",
+      "note": "single notification component, shipped as part of the platform library",
+      "rfc": "0003"
+    },
+    {
+      "component": "shopco.orders.notification",
+      "decision": "consolidate",
+      "target": "shopco.notification",
+      "note": "nobody imports it (Ca = 0); delete it while consolidating",
+      "rfc": "0003"
+    },
+    {
+      "component": "shopco.audit",
+      "decision": "consolidate",
+      "target": "shopco.audit",
+      "note": "used by 4 of 10 components; becomes part of the platform library",
+      "rfc": "0003"
+    },
+    {
+      "component": "shopco.orders",
+      "decision": "not common",
+      "note": "fan-in comes from being the core domain, not from being a shared concern",
+      "rfc": "0003"
+    },
+    {
+      "component": "shopco.reporting",
+      "decision": "not common",
+      "note": "keyword false positive: reporting is a business capability (driver 3)",
+      "rfc": "0003"
+    }
+  ]
+}

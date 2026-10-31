@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dewyll/monolith-decomposition-skill/schemas/data-coupling.schema.json",
+  "title": "Data coupling",
+  "description": "Tables, their owning and using components, written by find_data_coupling.py. Its edges use the edges schema.",
+  "type": "object",
+  "required": [
+    "generator",
+    "tables",
+    "edges"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "generator": {
+      "type": "object",
+      "required": [
+        "tool"
+      ]
+    },
+    "files": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tables": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "owners",
+          "users",
+          "shared"
+        ],
+        "properties": {
+          "owners": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "shared": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "description": "Same shape as edges.schema.json edges, kinds [\"database\"].",
+      "items": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "weight"
+        ],
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "kinds": {
+            "type": "array",
+            "items": {
+              "const": "database"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+graph LR
+  n_reporting["reporting"]
+  n_ordering["ordering"]
+  n_platform["platform"]
+  n_customer["customer"]
+  n_payment["payment"]
+  n_shell["shell"]
+  n_ordering -->|1| n_customer
+  n_ordering -->|3| n_platform
+  n_payment -->|2| n_platform
+  n_reporting -->|1| n_customer
+  n_reporting -->|2| n_ordering
+  n_reporting -->|1| n_payment
+  n_reporting -->|1| n_platform
+  n_shell -->|1| n_ordering
+  n_shell -->|1| n_reporting

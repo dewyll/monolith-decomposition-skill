@@ -8,12 +8,28 @@ itself and talks to other domains through a few well-understood paths.
 
 ## Proposing domains
 
-Combine three sources and say which one drove each grouping:
+Start from a measured first cut:
+
+```bash
+python3 "$SKILL_DIR/scripts/suggest_domains.py" --workspace decomposition --write-draft
+```
+
+It clusters components with Louvain modularity over the import graph and,
+when `change_coupling.py` ran, the co-change pairs (`--change-weight` sets
+the mix). Components consolidated as shared code in Phase 2 are left out,
+because they would glue every cluster together. It writes
+`05-domains/domain-suggestions.md` (clusters, cohesion, modularity Q) and,
+with `--write-draft`, `domains.draft.json`. It never writes `domains.json`.
+A modularity below ~0.3 means the code has no strong structure: say so and
+lean harder on the business conversation.
+
+Then combine three sources and say which one drove each grouping:
 
 1. **Names and namespaces**: `customer.profile`, `customer.billing` hint at a
    customer domain.
-2. **Coupling**: components with heavy mutual dependencies want to live
-   together; components in a cycle must, unless the cycle is broken first.
+2. **Coupling**: components with heavy mutual dependencies (or that keep
+   changing together) want to live together; components in a cycle must,
+   unless the cycle is broken first. This is what the suggestions measure.
 3. **The business**: ask the user how the organisation talks about its work,
    which teams own what, and which parts change or scale together. This
    source wins when it disagrees with the other two; record the
@@ -73,13 +89,14 @@ propose, then do it only if asked.
 - Native: domain boundary rules in the team's tool. This is the most
   valuable fitness function of the whole process; the adapter shows how
   (independence contracts, layer rules, module verification, packs).
-- From here on, recommend running `check_fitness.py --phase guard` in CI,
-  together with the extract and analyze scripts, so new code cannot appear
-  outside a domain or cross a forbidden boundary. See `fitness-functions.md`.
+- From here on, recommend running `run_guard.py` in CI, so new code cannot
+  appear outside a domain, cross a forbidden boundary or add a dependency
+  beyond the baseline. See `fitness-functions.md`.
 
 ## Gate
 
-Show the domain map (Mermaid from `domain-coupling.mmd`), cohesion per
+Show the suggested clusters next to the proposed map (and why they
+differ), the domain map (Mermaid from `domain-coupling.mmd`), cohesion per
 domain, cross-domain edges with weights, any domain cycles, and the
 contested boundaries with your recommendation. Ask the user to confirm the
 map and the forbidden dependencies.

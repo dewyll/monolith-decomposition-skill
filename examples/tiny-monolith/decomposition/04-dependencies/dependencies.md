@@ -1,6 +1,6 @@
 # Component dependencies
 
-Generated 2026-10-15T11:00:23+00:00 from `extract_dependencies.py` (confidence: **low**).
+Generated 2026-10-31T18:30:34+00:00 from `extract_dependencies.py` (confidence: **low**).
 
 - Nodes: **10** · edges: **16** · density: 0.178
 - Mean efferent coupling: 1.6 (σ 1.91)
@@ -27,6 +27,7 @@ Generated 2026-10-15T11:00:23+00:00 from `extract_dependencies.py` (confidence: 
 ## Cycles
 
 1. `shopco.inventory`, `shopco.orders`
+   - cheapest cut (lightest edges that make this group acyclic): `shopco.inventory` → `shopco.orders` (weight 1)
 
 ## Dependency matrix
 

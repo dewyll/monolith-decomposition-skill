@@ -1,6 +1,6 @@
 ---
 name: decompose
-description: Guides a phased, evidence-based migration from a monolith to services (component-based decomposition or tactical forking), in any programming language. Each phase measures the codebase with scripts, produces versioned artifacts (component sizes, common-domain candidates, dependency matrix, domains, services), records every architecture decision as a numbered RFC, adds fitness functions to protect it, and stops at a human approval gate. Use when someone wants to break up, split, modularize or decompose a monolith, find service boundaries, measure component size or coupling, plan a microservices migration, or set up architecture fitness functions.
+description: Use when someone wants to break up, split, modularize or decompose a monolith, find service boundaries, plan a microservices migration, measure component size, coupling or co-change, or set up architecture fitness functions, in any programming language. Runs a phased, evidence-based workflow (component-based decomposition or tactical forking) where scripts measure the code and its git history, every decision becomes a numbered RFC guarded by a fitness function, and each phase stops at a human approval gate.
 ---
 
 # Monolith decomposition
@@ -25,8 +25,12 @@ Three rules shape everything below:
 
 ## Where things live
 
-`SKILL_DIR` below means the directory of this file. All scripts are Python
-3.9+ with no dependencies; call them with `python3 "$SKILL_DIR/scripts/<name>.py"`.
+This skill lives in `${CLAUDE_SKILL_DIR}` (agents that do not fill that in:
+the folder that contains this file). The references write it as
+`$SKILL_DIR`; shell variables do not survive between commands, so put the
+full path in every command: `python3 "${CLAUDE_SKILL_DIR}/scripts/<name>.py"`.
+All scripts are Python 3.9+ with no dependencies, and `--help` on any of
+them shows its options.
 
 | Path | What it holds |
 |---|---|
@@ -38,6 +42,7 @@ Three rules shape everything below:
 | `adapters/<ecosystem>.md` | What "component" means there, native extractors, fitness libraries |
 | `schemas/*.schema.json` | Contracts for every artifact; the neutral format between tools |
 | `templates/` | RFC and phase report templates |
+| `scripts/` | measurement (`size_components`, `extract_dependencies`, `change_coupling`, `find_data_coupling`, `find_common_candidates`), analysis (`analyze_dependencies`, `suggest_domains`), guards (`check_fitness`, `run_guard`), bookkeeping (`init_workspace`, `new_rfc`, `state`, `convert_edges`) |
 
 The user's project gets a workspace folder (default `decomposition/`) with
 one subfolder per phase, `rfcs/`, `fitness/`, `config.json` and `state.json`.
@@ -99,6 +104,18 @@ For every phase, in this order:
    RFCs Accepted with `new_rfc.py --set-status`, run
    `state.py approve N --by "<name>"`, and only then move on.
 
+`state.py` enforces the gate: it will not start a phase before the previous
+one is approved, and will not approve one whose RFCs are not Accepted or
+whose latest `check_fitness.py --phase N` run failed. Fix the cause, or put
+the exception on record (an allow-list entry naming its RFC, or the
+baseline below). Use `--force --reason "..."` only when the user explicitly
+asks for an override; it is written to the history.
+
+From Phase 4 on, record the current graph with
+`check_fitness.py --update-baseline` and wire `run_guard.py` into CI (see
+`references/fitness-functions.md`): existing cycles and edges are frozen,
+and the build fails only on what gets worse.
+
 If the user rejects or changes a proposal, update the artifact and the RFC
 (or supersede it) before asking again. If a later phase reveals that an
 earlier decision was wrong, propose `state.py reopen` for that phase; later
@@ -110,7 +127,11 @@ phases become `stale` and must be revisited.
   above the mean" rather than "orders is big".
 - Separate what the scripts measured from what you infer. Say when data is
   low confidence (the regex extractor misses dependency injection, events,
-  reflection and shared tables).
+  reflection and shared tables). `change_coupling.py` (git history) and
+  `find_data_coupling.py` (ORM mappings, SQL) surface much of what imports
+  miss; run them before trusting the graph.
+- Suggestions are not decisions: `suggest_domains.py` gives a measured
+  first cut for Phase 5, never the domain map itself.
 - Ask about the business when the code cannot answer: who owns this, how
   often does it change, does it scale differently, does it fail differently.
 - Keep gates short. A reviewer should decide in minutes; details live in

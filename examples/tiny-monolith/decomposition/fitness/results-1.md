@@ -1,9 +1,9 @@
 # Fitness functions: phase 1
 
-Run 2026-10-15T11:00:55+00:00. Result: **FAIL**
+Run 2026-10-31T18:28:45+00:00. Result: **PASS**
 
 | Check | Status | Result |
 |---|---|---|
 | F1.1 | PASS | all source files mapped to a component |
-| F1.2 | FAIL | 1 component(s) above the max share |
-| F1.3 | WARN | 1 size outlier(s) without justification |
+| F1.2 | PASS | no component above the max share |
+| F1.3 | PASS | every size outlier is justified |

@@ -58,6 +58,53 @@ def adapter_for(language: str) -> str:
     return ADAPTER_FOR_LANGUAGE.get(language, "other")
 
 
+def comment_style(language: str) -> str:
+    for lang, style in LANGUAGES.values():
+        if lang == language:
+            return style
+    return NONE_STYLE
+
+
+# --------------------------------------------------------------------------
+# Comment stripping (string-aware, line numbers preserved)
+# --------------------------------------------------------------------------
+_DQ = r'"(?:\\.|[^"\\\n])*"'
+_SQ = r"'(?:\\.|[^'\\\n])*'"
+_STRIP_RX = {
+    C_STYLE: re.compile(r"//[^\n]*|/\*.*?\*/|" + _DQ + "|" + _SQ + r"|`(?:\\.|[^`\\])*`", re.S),
+    "php": re.compile(r"//[^\n]*|#(?!\[)[^\n]*|/\*.*?\*/|" + _DQ + "|" + _SQ, re.S),
+    HASH_STYLE: re.compile(r'"""(?:\\.|[^\\])*?"""|' + r"'''(?:\\.|[^\\])*?'''|#[^\n]*|" + _DQ + "|" + _SQ,
+                           re.S),
+    RUBY_STYLE: re.compile(r"^=begin\b.*?^=end\b[^\n]*|#[^\n]*|" + _DQ + "|" + _SQ, re.S | re.M),
+    LUA_STYLE: re.compile(r"--\[\[.*?\]\]|--[^\n]*|" + _DQ + "|" + _SQ, re.S),
+}
+_COMMENT_START = ("//", "/*", "#", "--", "=begin")
+
+
+def strip_comments(text: str, style: str, blank_strings: bool = False) -> str:
+    """Remove comments (and optionally string bodies) but keep every newline,
+    so that import scanners do not pick up commented-out or quoted imports.
+
+    String literals are matched first so that `"http://x"` is not mistaken
+    for a comment. With blank_strings=True, strings are replaced by an empty
+    literal of the same quote (Python docstrings, for example).
+    """
+    rx = _STRIP_RX.get(style)
+    if rx is None:
+        return text
+
+    def repl(m: "re.Match[str]") -> str:
+        s = m.group(0)
+        if s.startswith(_COMMENT_START):
+            return "\n" * s.count("\n")
+        if blank_strings:
+            q = s[:3] if s[:3] in ('"""', "'''") else s[0]
+            return q + "\n" * s.count("\n") + q
+        return s
+
+    return rx.sub(repl, text)
+
+
 # --------------------------------------------------------------------------
 # Small utilities
 # --------------------------------------------------------------------------
@@ -247,6 +294,34 @@ def iter_source_files(project_root: Path, config: dict) -> Iterator[Tuple[str, s
                 if exclude and matches_any(rel, exclude):
                     continue
                 yield rel, LANGUAGES[ext][0]
+
+
+def in_scope(rel: str, config: dict) -> Optional[str]:
+    """Language of a project-relative path if the config would analyse it, else None.
+
+    The same rules as iter_source_files, but for paths that may no longer
+    exist on disk (files from git history, for example).
+    """
+    rel = posix(rel)
+    if rel.startswith("./"):
+        rel = rel[2:]
+    ext = PurePosixPath(rel).suffix.lower()
+    allowed_ext = set(config.get("extensions") or LANGUAGES.keys())
+    if ext not in LANGUAGES or ext not in allowed_ext:
+        return None
+    ws_name = Path(config.get("_workspace_dir_name", "decomposition")).name
+    dirs = rel.split("/")[:-1]
+    if any(d in ALWAYS_EXCLUDED_DIRS or d == ws_name for d in dirs):
+        return None
+    roots = source_roots(config)
+    if not any(r["path"] == "." or rel == r["path"] or rel.startswith(r["path"] + "/") for r in roots):
+        return None
+    include = config.get("include") or ["**/*"]
+    if include and not matches_any(rel, include):
+        return None
+    if matches_any(rel, config.get("exclude") or []):
+        return None
+    return LANGUAGES[ext][0]
 
 
 # --------------------------------------------------------------------------

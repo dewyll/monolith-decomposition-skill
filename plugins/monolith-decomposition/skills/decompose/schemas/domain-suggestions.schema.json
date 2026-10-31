@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dewyll/monolith-decomposition-skill/schemas/domain-suggestions.schema.json",
+  "title": "Domain suggestions",
+  "description": "Clusters proposed by suggest_domains.py as a starting point for domains.json.",
+  "type": "object",
+  "required": [
+    "generator",
+    "modularity",
+    "suggestions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "generator": {
+      "type": "object",
+      "required": [
+        "tool"
+      ]
+    },
+    "modularity": {
+      "type": "number"
+    },
+    "shared": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "suggestions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "components"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "size_percent": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "cohesion": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "isolated": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

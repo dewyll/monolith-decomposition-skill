@@ -1,0 +1,33 @@
+{
+  "generated_at": "2026-10-31T18:30:35+00:00",
+  "phase": "5",
+  "strict": false,
+  "baseline": "fitness/baseline.json",
+  "passed": true,
+  "results": [
+    {
+      "id": "F5.1",
+      "status": "PASS",
+      "message": "every component in exactly one domain",
+      "details": []
+    },
+    {
+      "id": "F5.2",
+      "status": "PASS",
+      "message": "all ids known",
+      "details": []
+    },
+    {
+      "id": "F5.3",
+      "status": "SKIP",
+      "message": "domain-coupling.json or thresholds.min_domain_cohesion missing",
+      "details": []
+    },
+    {
+      "id": "F5.4",
+      "status": "PASS",
+      "message": "no forbidden dependencies",
+      "details": []
+    }
+  ]
+}

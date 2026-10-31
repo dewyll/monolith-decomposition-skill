@@ -15,6 +15,13 @@ counter; scc treats them the same way).
 
 ## Dependencies
 
+The built-in scanner parses Python files with the standard library `ast`
+module, so multi-line imports, imports inside functions and
+`if TYPE_CHECKING:` blocks are all seen and docstrings are ignored. Files
+the running interpreter cannot parse (Python 2, newer syntax) fall back to
+the regex scanner. It still cannot see `importlib`, plugins loaded by
+entry points or Django's string references (`"app.Model"`, `INSTALLED_APPS`).
+
 **grimp** (the engine behind import-linter) builds the import graph from the
 installed package:
 

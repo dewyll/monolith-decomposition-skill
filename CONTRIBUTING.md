@@ -34,6 +34,15 @@ pip install jsonschema                               # optional: also validates 
 claude plugin validate .                             # check the plugin manifests
 ```
 
+Behaviour changes to `SKILL.md` or the phase guides should keep the evals
+green (`plugins/monolith-decomposition/evals/`, see its README). They run
+real agent sessions on your account, so run them locally when you change
+how the agent is instructed, not on every pull request.
+
+If you change the scripts' output, regenerate the affected artifacts in
+`examples/tiny-monolith/decomposition/` (the tests check that the
+committed example still passes its own guard).
+
 To try local changes in Claude Code:
 
 ```bash

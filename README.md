@@ -104,8 +104,8 @@ Three rules keep it honest:
 | **1. Identify & size** | component inventory: size, % of codebase, z-score, outliers | Inventory and size thresholds | no component above *X*%, outliers justified |
 | **2. Common domain** | shared-concern candidates, duplicated capabilities, fan-in | What gets consolidated, and where | duplicates cannot come back |
 | **3. Flatten** | orphaned code in parent namespaces and where it goes | Flattening plan | no code in flattened parents |
-| **4. Dependencies** | Ca/Ce/instability, cycles, matrix, Mermaid graph, feasibility | Coupling assessment, how to break each cycle | no cycles, coupling cap |
-| **5. Domains** | domain map, cross-domain edges, cohesion per domain | Domain map, contested boundaries | forbidden dependencies between domains |
+| **4. Dependencies** | Ca/Ce/instability, cycles with their cheapest cut, matrix, Mermaid graph, co-change from git history, shared tables | Coupling assessment, how to break each cycle | no new cycles or edges beyond the baseline, coupling cap |
+| **5. Domains** | clustering suggestions (Louvain), domain map, cross-domain edges, cohesion per domain | Domain map, contested boundaries | forbidden dependencies between domains |
 | **6. Services** | service map, declared interfaces, extraction order | One per service, extraction order, shared-code reuse | undeclared cross-service calls fail CI |
 
 ## Quick start
@@ -195,10 +195,14 @@ decomposition/
 ```
 
 Commit it. The RFC log becomes the architecture history of the migration,
-and the same scripts can run in CI as a guard:
+and the same scripts run in CI as a guard. `run_guard.py` re-measures the
+code and checks it against the decisions and the
+[baseline](plugins/monolith-decomposition/skills/decompose/references/fitness-functions.md#the-baseline-a-ratchet-not-a-wall):
+today's cycles and edges are frozen, and the build fails only on what gets
+worse.
 
 ```bash
-python3 $SKILL/scripts/check_fitness.py --workspace decomposition --phase guard
+python3 $SKILL/scripts/run_guard.py --workspace decomposition
 ```
 
 > "Everything in software architecture is a trade-off."
@@ -211,8 +215,9 @@ That is why every RFC has an explicit trade-offs section.
 [`examples/tiny-monolith`](examples/tiny-monolith) is a deliberately messy
 Python shop with an oversized component, orphaned code, a duplicated
 notification module and an `orders` ↔ `inventory` cycle. Its committed
-[`decomposition/`](examples/tiny-monolith/decomposition) folder shows real
-artifacts and RFCs from phases 0 and 1.
+[`decomposition/`](examples/tiny-monolith/decomposition) folder is a complete
+run, **phases 0 to 6 approved**: eight [RFCs](examples/tiny-monolith/decomposition/rfcs/index.md),
+a domain map, a service map with extraction order, and a green guard.
 
 ```bash
 SKILL=plugins/monolith-decomposition/skills/decompose
@@ -220,6 +225,7 @@ python3 $SKILL/scripts/init_workspace.py examples/tiny-monolith --dir scratch
 python3 $SKILL/scripts/size_components.py      --workspace examples/tiny-monolith/scratch
 python3 $SKILL/scripts/extract_dependencies.py --workspace examples/tiny-monolith/scratch
 python3 $SKILL/scripts/analyze_dependencies.py --workspace examples/tiny-monolith/scratch
+python3 $SKILL/scripts/suggest_domains.py      --workspace examples/tiny-monolith/scratch
 python3 $SKILL/scripts/check_fitness.py        --workspace examples/tiny-monolith/scratch --phase all
 ```
 
@@ -231,12 +237,16 @@ python3 $SKILL/scripts/check_fitness.py        --workspace examples/tiny-monolit
 | `init_workspace.py` | Detect languages and source roots, create the workspace |
 | `size_components.py` | Map files to components, measure size, flag outliers and orphaned code |
 | `find_common_candidates.py` | Shared-concern, duplicate and fan-in signals for Phase 2 |
-| `extract_dependencies.py` | Regex import scanner for many languages (low-confidence fallback) |
+| `extract_dependencies.py` | Import scanner for many languages (`ast` for Python, comment-aware regex elsewhere; low-confidence fallback) |
 | `convert_edges.py` | Turn any tool's `from<TAB>to` output into neutral edges |
-| `analyze_dependencies.py` | Ca, Ce, instability, cycles, matrix, Mermaid, domain cohesion |
-| `check_fitness.py` | Generic fitness functions per phase, `guard` mode for CI |
+| `change_coupling.py` | Churn and co-change from git history; flags pairs with no static dependency |
+| `find_data_coupling.py` | Tables per component from ORM mappings and SQL strings; `database` edges |
+| `analyze_dependencies.py` | Ca, Ce, instability, cycles with cut candidates, matrix, Mermaid, domain cohesion; merges extra edge files |
+| `suggest_domains.py` | Louvain clustering over imports + co-change as a starting point for domains |
+| `check_fitness.py` | Generic fitness functions per phase, `guard` mode and baseline ratchet for CI |
+| `run_guard.py` | One command for CI: re-measure, analyse, check the guard set |
 | `new_rfc.py` | Numbered RFCs from the template, statuses, superseding, index |
-| `state.py` | Phase state machine with approval gates and reopen |
+| `state.py` | Phase state machine that enforces the gates (accepted RFCs, passing fitness) |
 
 All scripts are Python 3.9+ with no third-party dependencies.
 </details>
@@ -250,12 +260,13 @@ the agent propose a plan and only move code when you ask.
 **How accurate are the numbers?**
 Sizes are exact for the chosen metric. Dependencies from the built-in
 scanner are a lower bound (static imports only) and are labelled
-*low confidence*; native extractors and the hidden-coupling checklist in
-Phase 4 (dependency injection, events, reflection, shared tables) close the gap.
+*low confidence*. Native extractors, change coupling from git history,
+the shared-table scan and the hidden-coupling checklist in Phase 4
+(dependency injection, events, reflection) close the gap.
 
 **What about the database?**
-Code decomposition comes first. Shared tables are recorded as coupling in
-Phase 4 and as open data decisions in Phase 6; splitting the data itself is
+Code decomposition comes first. Shared tables are found by
+`find_data_coupling.py` and recorded as coupling in Phase 4 and as open data decisions in Phase 6; splitting the data itself is
 the next step of the migration and is out of scope for this skill.
 
 **We already use ADRs.**
